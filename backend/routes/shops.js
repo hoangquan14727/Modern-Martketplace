@@ -1,0 +1,14 @@
+const express = require('express');
+const router = express.Router();
+const shopController = require('../controllers/shopController');
+const { verifyToken, requireRole } = require('../middleware/auth');
+const { auditAction } = require('../middleware/auditLog');
+router.get('/', shopController.getShops);
+router.get('/public/:id', shopController.getShopPublic);
+router.get('/profile', verifyToken, requireRole('shop'), shopController.getProfile);
+router.put('/profile', verifyToken, requireRole('shop'), shopController.updateProfile);
+router.get('/dashboard', verifyToken, requireRole('shop'), shopController.getDashboard);
+router.get('/finance', verifyToken, requireRole('shop'), shopController.getFinance);
+router.get('/admin/all', verifyToken, requireRole('admin'), shopController.getAllShops);
+router.patch('/:id/status', verifyToken, requireRole('admin'), auditAction('shop.update_status', 'shop'), shopController.updateShopStatus);
+module.exports = router;

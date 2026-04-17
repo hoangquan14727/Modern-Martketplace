@@ -1,0 +1,16 @@
+const express = require('express');
+const router = express.Router();
+const adminController = require('../controllers/adminController');
+const permissionController = require('../controllers/permissionController');
+const { verifyToken, requireRole, requirePermission } = require('../middleware/auth');
+router.use(verifyToken, requireRole('admin'));
+router.get('/dashboard', adminController.getDashboard);
+router.get('/reports', adminController.getReports);
+router.get('/finance', adminController.getFinance);
+router.get('/pending-counts', adminController.getPendingCounts);
+router.get('/permissions/roles', permissionController.getRoles);
+router.get('/permissions/list', permissionController.getPermissions);
+router.get('/permissions/admins', permissionController.getAdmins);
+router.patch('/permissions/admins/:id', permissionController.updateAdminPermissions);
+router.post('/permissions/admins/:id/apply-role', permissionController.applyRoleTemplate);
+module.exports = router;
