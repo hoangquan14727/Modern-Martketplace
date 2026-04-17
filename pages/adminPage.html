@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HQMart - Quản trị hệ thống</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { hq: { primary: '#2563EB', 'primary-hover': '#1D4ED8', 'primary-light': '#DBEAFE', 'primary-bg': '#EFF6FF', dark: '#0F172A', sale: '#EF4444', success: '#10B981', warning: '#F59E0B' } }, fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/toast.css" />
+  <script src="../js/toast.js" defer></script>
+  <script src="../js/transitions.js"></script>
+  <script src="../js/api.js"></script>
+</head>
+
+<body>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="homePage.html" class="sidebar-brand"><span class="brand-hq">HQ</span><span
+            class="brand-mart">Mart</span></a>
+      </div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar"><span id="sidebar-user-initial">A</span></div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-user-name">Admin</div>
+          <div class="sidebar-user-role">Quản trị viên</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Tổng quan</div>
+        <a id="nav-dashboard" class="nav-item active" onclick="switchView('view-dashboard')"><span
+            class="material-symbols-outlined">dashboard</span>Bảng điều khiển</a>
+        <a id="nav-customers" class="nav-item" onclick="switchView('view-customers')"><span
+            class="material-symbols-outlined">group</span>Người dùng</a>
+        <a id="nav-stores" class="nav-item" onclick="switchView('view-stores')"><span
+            class="material-symbols-outlined">storefront</span>Cửa hàng</a>
+        <a id="nav-products" class="nav-item" onclick="switchView('view-products')"><span
+            class="material-symbols-outlined">inventory_2</span>Sản phẩm</a>
+        <div class="nav-section-label">Vận hành</div>
+        <a id="nav-orders" class="nav-item" onclick="switchView('view-orders')"><span
+            class="material-symbols-outlined">shopping_cart</span>Đơn hàng</a>
+        <a id="nav-promotions" class="nav-item" onclick="switchView('view-promotions')"><span
+            class="material-symbols-outlined">sell</span>Khuyến mãi</a>
+        <a id="nav-finance" class="nav-item" onclick="switchView('view-finance')"><span
+            class="material-symbols-outlined">payments</span>Tài chính</a>
+        <div class="nav-section-label">Hỗ trợ &amp; Hệ thống</div>
+        <a id="nav-support" class="nav-item" onclick="switchView('view-support')"><span
+            class="material-symbols-outlined">support_agent</span>Hỗ trợ</a>
+        <a id="nav-reviews" class="nav-item" onclick="switchView('view-reviews')"><span
+            class="material-symbols-outlined">reviews</span>Đánh giá</a>
+        <a id="nav-notifications" class="nav-item" onclick="switchView('view-notifications')"><span
+            class="material-symbols-outlined">notifications</span>Thông báo</a>
+        <a id="nav-categories" class="nav-item" onclick="switchView('view-categories')"><span
+            class="material-symbols-outlined">category</span>Danh mục</a>
+        <a id="nav-permissions" class="nav-item" onclick="switchView('view-permissions')"><span
+            class="material-symbols-outlined">security</span>Nhân sự nội bộ</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()"><span class="material-symbols-outlined"
+            style="font-size:1.125rem">logout</span>Đăng xuất</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-bar">
+        <h2 class="top-bar-title" id="header-page-title">Bảng điều khiển</h2>
+        <div class="top-bar-actions">
+          <div style="position:relative">
+            <button class="btn-icon" onclick="toggleNotifications()">
+              <span class="material-symbols-outlined">notifications</span>
+              <span id="nav-notif-badge" class="notification-badge hidden"></span>
+            </button>
+            <div id="nav-notif-dropdown" class="hidden"
+              style="position:absolute;right:0;top:100%;margin-top:0.5rem;width:20rem;background:var(--hq-bg-white);border:1px solid var(--hq-border);border-radius:var(--hq-radius-md);box-shadow:var(--hq-shadow-lg);z-index:50;overflow:hidden;">
+              <div
+                style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1rem;border-bottom:1px solid var(--hq-border);">
+                <h4 style="font-size:0.875rem;font-weight:700;color:var(--hq-text)">Thông báo</h4>
+                <button onclick="markAllNotificationsRead()" style="font-size:0.75rem;color:var(--hq-primary)">Đọc tất
+                  cả</button>
+              </div>
+              <div id="nav-notif-list" style="max-height:16rem;overflow-y:auto;">
+                <div style="padding:1rem;text-align:center;font-size:0.75rem;color:var(--hq-text-muted)">Không có thông
+                  báo</div>
+              </div>
+            </div>
+          </div>
+          <div class="user-menu">
+            <button class="user-profile-btn" id="user-dropdown-btn" onclick="toggleUserDropdown(event)"><span
+                id="header-user-initial">A</span></button>
+            <div id="user-dropdown-menu" class="user-dropdown">
+              <div class="user-dropdown-card">
+                <div class="user-dropdown-header">
+                  <p id="dropdown-user-name" class="user-name">Admin</p>
+                  <p id="dropdown-user-email" class="user-email">admin@hqmart.com</p>
+                </div>
+                <a href="productPage.html" class="user-dropdown-link"><span class="material-symbols-outlined"
+                    style="font-size:1.125rem">shopping_bag</span>Sản phẩm</a>
+                <a href="cartPage.html" class="user-dropdown-link"><span class="material-symbols-outlined"
+                    style="font-size:1.125rem">shopping_cart</span>Giỏ hàng</a>
+                <a href="homePage.html" class="user-dropdown-link"><span class="material-symbols-outlined"
+                    style="font-size:1.125rem">home</span>Trang chủ</a>
+                <div class="user-dropdown-divider"></div>
+                <button onclick="logout()" class="user-dropdown-link user-dropdown-btn logout"><span
+                    class="material-symbols-outlined" style="font-size:1.125rem">logout</span>Đăng xuất</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- Dashboard View -->
+        <div id="view-dashboard" class="content-wrapper" style="display:flex;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Bảng điều khiển</h1>
+              <p class="view-description">Tổng quan hoạt động hệ thống HQMart</p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <p class="stat-label">Tổng doanh thu</p>
+                  <h3 id="stats-total-sales" class="stat-value">₫0</h3>
+                </div>
+                <div
+                  style="width:2.75rem;height:2.75rem;border-radius:var(--hq-radius-md);background:var(--hq-success-bg);display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="color:var(--hq-success)">payments</span></div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <p class="stat-label">Người dùng</p>
+                  <h3 id="stats-active-users" class="stat-value">0</h3>
+                </div>
+                <div
+                  style="width:2.75rem;height:2.75rem;border-radius:var(--hq-radius-md);background:var(--hq-primary-bg);display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="color:var(--hq-primary)">group</span></div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <p class="stat-label">Shop chờ duyệt</p>
+                  <h3 id="stats-pending-shops" class="stat-value">0</h3>
+                </div>
+                <div
+                  style="width:2.75rem;height:2.75rem;border-radius:var(--hq-radius-md);background:var(--hq-warning-bg);display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="color:var(--hq-warning)">storefront</span></div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <p class="stat-label">Ticket đang mở</p>
+                  <h3 id="stats-open-tickets" class="stat-value">0</h3>
+                </div>
+                <div
+                  style="width:2.75rem;height:2.75rem;border-radius:var(--hq-radius-md);background:var(--hq-sale-bg);display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="color:var(--hq-sale)">support_agent</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title"><span class="material-symbols-outlined">receipt_long</span>Đơn hàng gần đây</h2>
+            </div>
+            <div class="table-container" style="border:none;box-shadow:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-orders-body">
+                  <tr>
+                    <td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có đơn
+                      hàng gần đây</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stores View -->
+        <div id="view-stores" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Quản lý cửa hàng</h1>
+              <p class="view-description">Duyệt và quản lý các cửa hàng trên hệ thống</p>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Tên cửa hàng</th>
+                    <th>Chủ sở hữu</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="stores-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products View -->
+        <div id="view-products" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Quản lý sản phẩm</h1>
+              <p class="view-description">Kiểm duyệt và quản lý sản phẩm trên hệ thống</p>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Sản phẩm</th>
+                    <th>Cửa hàng</th>
+                    <th>Giá</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="products-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders View -->
+        <div id="view-orders" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Quản lý đơn hàng</h1>
+              <p class="view-description">Theo dõi tất cả đơn hàng trên hệ thống</p>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Ngày đặt</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customers View -->
+        <div id="view-customers" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Quản lý người dùng</h1>
+              <p class="view-description">Quản lý tài khoản khách hàng trên hệ thống</p>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Tên</th>
+                    <th>Email</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support View -->
+        <div id="view-support" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Hỗ trợ khách hàng</h1>
+              <p class="view-description">Quản lý ticket hỗ trợ từ khách hàng</p>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tiêu đề</th>
+                    <th>Mức độ</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="support-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finance View -->
+        <div id="view-finance" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Tài chính</h1>
+              <p class="view-description">Tổng quan doanh thu và giao dịch</p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <p class="stat-label">Tổng doanh thu</p>
+                  <h3 id="finance-revenue" class="stat-value">₫0</h3>
+                </div>
+                <div
+                  style="width:2.75rem;height:2.75rem;border-radius:var(--hq-radius-full);background:var(--hq-success-bg);display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="color:var(--hq-success)">payments</span></div>
+              </div>
+              <p style="font-size:0.75rem;color:var(--hq-success);margin-top:0.5rem;">&#8593; Tổng thu nhập</p>
+            </div>
+            <div class="stat-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <p class="stat-label">Tổng đơn hàng</p>
+                  <h3 id="finance-orders" class="stat-value">0</h3>
+                </div>
+                <div
+                  style="width:2.75rem;height:2.75rem;border-radius:var(--hq-radius-full);background:var(--hq-primary-bg);display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="color:var(--hq-primary)">shopping_cart</span></div>
+              </div>
+              <p id="finance-orders-trend" style="font-size:0.75rem;color:var(--hq-text-muted);margin-top:0.5rem;">Đơn
+                hàng hoàn thành</p>
+            </div>
+            <div class="stat-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <p class="stat-label">Giá trị TB/Đơn</p>
+                  <h3 id="finance-avg-order" class="stat-value">₫0</h3>
+                </div>
+                <div
+                  style="width:2.75rem;height:2.75rem;border-radius:var(--hq-radius-full);background:#F3E8FF;display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="color:#8B5CF6">analytics</span></div>
+              </div>
+              <p style="font-size:0.75rem;color:var(--hq-text-muted);margin-top:0.5rem;">Mỗi giao dịch</p>
+            </div>
+            <div class="stat-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <p class="stat-label">Hoa hồng nền tảng</p>
+                  <h3 id="finance-commission" class="stat-value">₫0</h3>
+                </div>
+                <div
+                  style="width:2.75rem;height:2.75rem;border-radius:var(--hq-radius-full);background:var(--hq-warning-bg);display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="color:var(--hq-warning)">trending_up</span></div>
+              </div>
+              <p style="font-size:0.75rem;color:var(--hq-text-muted);margin-top:0.5rem;">10% doanh thu</p>
+            </div>
+          </div>
+          <div class="two-col-grid">
+            <div class="card">
+              <h3 class="card-title" style="margin-bottom:1rem;">Biểu đồ doanh thu</h3>
+              <div style="height:16rem;"><canvas id="revenueChart"></canvas></div>
+            </div>
+            <div class="card">
+              <h3 class="card-title" style="margin-bottom:1rem;">Phân bổ trạng thái đơn</h3>
+              <div style="height:16rem;"><canvas id="orderStatusChart"></canvas></div>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--hq-border);">
+              <h3 class="card-title">Top cửa hàng theo doanh thu</h3>
+            </div>
+            <div class="table-container" style="border:none;border-radius:0;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Tên cửa hàng</th>
+                    <th>Số đơn</th>
+                    <th>Doanh thu</th>
+                    <th>Hoa hồng</th>
+                  </tr>
+                </thead>
+                <tbody id="top-shops-body">
+                  <tr>
+                    <td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div
+              style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--hq-border);display:flex;justify-content:space-between;align-items:center;">
+              <h3 class="card-title">Giao dịch gần đây</h3><button class="btn btn-secondary btn-sm">Xuất CSV</button>
+            </div>
+            <div class="table-container" style="border:none;border-radius:0;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Loại</th>
+                    <th>Số tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày</th>
+                  </tr>
+                </thead>
+                <tbody id="finance-transactions-body">
+                  <tr>
+                    <td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews View -->
+        <div id="view-reviews" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Quản lý đánh giá</h1>
+              <p class="view-description">Kiểm duyệt đánh giá sản phẩm từ khách hàng</p>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Sản phẩm</th>
+                    <th>Khách hàng</th>
+                    <th>Đánh giá</th>
+                    <th>Bình luận</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="reviews-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promotions View -->
+        <div id="view-promotions" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Quản lý khuyến mãi</h1>
+              <p class="view-description">Tạo và quản lý chương trình khuyến mãi</p>
+            </div><button onclick="openPromotionModal()" class="btn btn-primary"><span class="material-symbols-outlined"
+                style="font-size:1.125rem">add</span>Tạo khuyến mãi</button>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Tên</th>
+                    <th>Mã</th>
+                    <th>Giảm giá</th>
+                    <th>Hết hạn</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="promotions-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications View -->
+        <div id="view-notifications" class="content-wrapper hidden"
+          style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Gửi thông báo</h1>
+              <p class="view-description">Gửi thông báo đến người dùng</p>
+            </div>
+          </div>
+          <div class="two-col-grid">
+            <div class="card">
+              <h3 class="card-title" style="margin-bottom:1rem;">Gửi cho người dùng</h3>
+              <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div class="form-group" style="margin-bottom:0;"><label class="form-label">ID người dùng</label><input
+                    type="number" id="notif-user-id" class="form-input" placeholder="Nhập ID người dùng" /></div>
+                <div class="form-group" style="margin-bottom:0;"><label class="form-label">Tiêu đề</label><input
+                    type="text" id="notif-title" class="form-input" placeholder="Tiêu đề thông báo" /></div>
+                <div class="form-group" style="margin-bottom:0;"><label class="form-label">Nội dung</label><textarea
+                    id="notif-message" rows="3" class="form-input" style="resize:none;"
+                    placeholder="Nội dung thông báo"></textarea></div><button onclick="sendNotification()"
+                  class="btn btn-primary w-full">Gửi thông báo</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3 class="card-title" style="margin-bottom:1rem;">Gửi hàng loạt</h3>
+              <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div class="form-group" style="margin-bottom:0;"><label class="form-label">Đối tượng</label><select
+                    id="bulk-role" class="form-input">
+                    <option value="all">Tất cả người dùng</option>
+                    <option value="customer">Chỉ khách hàng</option>
+                    <option value="shop">Chỉ cửa hàng</option>
+                  </select></div>
+                <div class="form-group" style="margin-bottom:0;"><label class="form-label">Tiêu đề</label><input
+                    type="text" id="bulk-title" class="form-input" placeholder="Tiêu đề thông báo" /></div>
+                <div class="form-group" style="margin-bottom:0;"><label class="form-label">Nội dung</label><textarea
+                    id="bulk-message" rows="3" class="form-input" style="resize:none;"
+                    placeholder="Nội dung thông báo"></textarea></div><button onclick="sendBulkNotification()"
+                  class="btn btn-primary w-full" style="background:var(--hq-info);">Gửi tất cả</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Categories View -->
+        <div id="view-categories" class="content-wrapper hidden" style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Quản lý danh mục</h1>
+              <p class="view-description">Tạo và chỉnh sửa danh mục sản phẩm</p>
+            </div><button onclick="openCategoryModal()" class="btn btn-primary"><span class="material-symbols-outlined"
+                style="font-size:1.125rem">add</span>Thêm danh mục</button>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tên</th>
+                    <th>Mô tả</th>
+                    <th>Sản phẩm</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="categories-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permissions / Staff View -->
+        <div id="view-permissions" class="content-wrapper hidden"
+          style="display:none;flex-direction:column;gap:1.5rem;">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Nhân sự nội bộ</h1>
+              <p class="view-description">Quản lý nhân viên và phân quyền</p>
+            </div><button onclick="showToast('Coming Soon','Add Staff feature coming in next update','info')"
+              class="btn btn-primary" title="Use User Management to promote users first"><span
+                class="material-symbols-outlined" style="font-size:1.125rem">add</span>Thêm nhân viên</button>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-container" style="border:none;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Nhân viên</th>
+                    <th>Chức vụ</th>
+                    <th>Phòng ban</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Promotion Modal -->
+  <div id="promotionModal" class="modal">
+    <div class="modal-backdrop" onclick="closePromotionModal()"></div>
+    <div class="modal-dialog">
+      <div class="modal-content-wrapper">
+        <div class="modal-panel">
+          <h3 class="card-title" style="margin-bottom:1.5rem;font-size:1.125rem;">Tạo khuyến mãi hệ thống</h3>
+          <form onsubmit="savePromotion(event)" style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Tên khuyến mãi</label><input
+                type="text" id="promo-name" required class="form-input" /></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Mã giảm giá</label><input
+                type="text" id="promo-code" required class="form-input" style="text-transform:uppercase;" /></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Giảm giá (%)</label><input
+                type="number" id="promo-discount" min="1" max="100" required class="form-input" /></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Hết hạn</label><input type="date"
+                id="promo-end-date" required class="form-input" /></div>
+            <div style="display:flex;gap:0.75rem;padding-top:0.5rem;"><button type="button"
+                onclick="closePromotionModal()" class="btn btn-secondary" style="flex:1;">Hủy</button><button
+                type="submit" class="btn btn-primary" style="flex:1;">Tạo</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div id="categoryModal" class="modal">
+    <div class="modal-backdrop" onclick="closeCategoryModal()"></div>
+    <div class="modal-dialog">
+      <div class="modal-content-wrapper">
+        <div class="modal-panel">
+          <h3 class="card-title" id="category-modal-title" style="margin-bottom:1.5rem;font-size:1.125rem;">Thêm danh
+            mục</h3>
+          <form onsubmit="saveCategory(event)" style="display:flex;flex-direction:column;gap:1rem;"><input type="hidden"
+              id="category-id" />
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Tên danh mục</label><input
+                type="text" id="category-name" required class="form-input" /></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Mô tả</label><textarea
+                id="category-description" rows="3" class="form-input" style="resize:none;"></textarea></div>
+            <div style="display:flex;gap:0.75rem;padding-top:0.5rem;"><button type="button"
+                onclick="closeCategoryModal()" class="btn btn-secondary" style="flex:1;">Hủy</button><button
+                type="submit" class="btn btn-primary" style="flex:1;">Lưu</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop Modal -->
+  <div id="shop-modal" class="modal">
+    <div class="modal-backdrop" onclick="closeShopModal()"></div>
+    <div class="modal-dialog">
+      <div class="modal-content-wrapper">
+        <div class="modal-panel">
+          <h3 class="card-title" style="margin-bottom:1.5rem;font-size:1.125rem;">Chỉnh sửa cửa hàng</h3>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Tên cửa hàng</label><input
+                id="shop-name" class="form-input" readonly /></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Trạng thái</label><select
+                id="shop-status" class="form-input">
+                <option value="approved">Đã duyệt</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="rejected">Từ chối</option>
+                <option value="suspended">Tạm khóa</option>
+              </select></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Tỷ lệ hoa hồng (%)</label><input
+                type="number" id="shop-commission" class="form-input" min="0" max="100" /></div>
+            <div style="display:flex;gap:0.75rem;padding-top:0.5rem;"><button onclick="closeShopModal()"
+                class="btn btn-secondary" style="flex:1;">Hủy</button><button onclick="saveShop()"
+                class="btn btn-primary" style="flex:1;">Lưu</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Modal -->
+  <div id="customer-modal" class="modal">
+    <div class="modal-backdrop" onclick="closeCustomerModal()"></div>
+    <div class="modal-dialog">
+      <div class="modal-content-wrapper">
+        <div class="modal-panel">
+          <h3 class="card-title" style="margin-bottom:1.5rem;font-size:1.125rem;">Chỉnh sửa khách hàng</h3>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Tên</label><input id="cust-name"
+                class="form-input" readonly /></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Trạng thái</label><select
+                id="cust-status" class="form-input">
+                <option value="active">Hoạt động</option>
+                <option value="banned">Bị khóa</option>
+              </select></div>
+            <div style="display:flex;gap:0.75rem;padding-top:0.5rem;"><button onclick="closeCustomerModal()"
+                class="btn btn-secondary" style="flex:1;">Hủy</button><button onclick="saveCustomer()"
+                class="btn btn-primary" style="flex:1;">Lưu</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permission Modal -->
+  <div id="permissionModal" class="modal">
+    <div class="modal-backdrop" onclick="closePermModal()"></div>
+    <div class="modal-dialog">
+      <div class="modal-content-wrapper">
+        <div class="modal-panel" style="max-width:28rem;">
+          <h3 class="card-title" style="margin-bottom:1.5rem;font-size:1.125rem;">Phân quyền nhân viên</h3>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Nhân viên</label><input
+                id="perm-staff-name" class="form-input" readonly /></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Chức vụ</label><input
+                id="perm-position" class="form-input" placeholder="VD: Support Lead" /></div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Quyền hạn</label>
+              <div id="perm-checkboxes"
+                style="display:flex;flex-direction:column;gap:0.5rem;max-height:200px;overflow-y:auto;padding:0.75rem;background:var(--hq-bg);border-radius:var(--hq-radius);border:1px solid var(--hq-border);">
+              </div>
+            </div>
+            <div style="display:flex;gap:0.75rem;padding-top:0.5rem;">
+              <button onclick="closePermModal()" class="btn btn-secondary" style="flex:1;">Hủy</button>
+              <button onclick="savePermissions()" class="btn btn-primary" style="flex:1;">Lưu</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatCurrency(amount) { return '₫' + Number(amount || 0).toLocaleString('vi-VN'); }
+    function formatDate(d) { return new Date(d).toLocaleDateString('vi-VN'); }
+    function getStatusLabel(status) { const map = { pending: 'Chờ xử lý', processing: 'Đang xử lý', shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy', approved: 'Đã duyệt', rejected: 'Từ chối', suspended: 'Tạm khóa', confirmed: 'Đã xác nhận', shipped: 'Đang giao' }; return map[status] || status; }
+    function getShopStatusBadge(status) { const map = { approved: 'badge-success', pending: 'badge-warning', rejected: 'badge-error', suspended: 'badge-error' }; return map[status] || 'badge-info'; }
+    function getShopStatusLabel(status) { const map = { approved: 'Đã duyệt', pending: 'Chờ duyệt', rejected: 'Từ chối', suspended: 'Tạm khóa' }; return map[status] || status; }
+    document.fonts.ready.then(() => { document.body.classList.add("font-loaded"); });
+    document.addEventListener("DOMContentLoaded", () => { if (typeof AuthAPI !== "undefined" && !AuthAPI.checkAuth("admin")) return; loadDashboardData(); });
+    function logout() { AuthAPI.logout(); }
+    function switchView(viewId) { document.querySelectorAll('[id^="view-"]').forEach((el) => { el.classList.add("hidden"); el.style.display = "none"; }); const selectedView = document.getElementById(viewId); if (selectedView) { selectedView.classList.remove("hidden"); selectedView.style.display = "flex"; } document.querySelectorAll(".nav-item").forEach((el) => { el.classList.remove("active"); }); const activeNavId = viewId.replace("view-", "nav-"); const activeNav = document.getElementById(activeNavId); if (activeNav) { activeNav.classList.add("active"); } switch (viewId) { case "view-dashboard": loadDashboardData(); break; case "view-stores": loadStoresData(); break; case "view-products": loadProductsData(); break; case "view-orders": loadOrdersData(); break; case "view-customers": loadCustomersData(); break; case "view-finance": loadFinanceData(); break; case "view-support": loadSupportData(); break; case "view-reviews": loadReviewsData(); break; case "view-promotions": loadPromotionsData(); break; case "view-categories": loadCategoriesData(); break; case "view-permissions": loadPermissionsData(); break; } }
+    async function loadDashboardData() { try { const res = await AdminAPI.getDashboard(); console.log("Dashboard API response:", res); if (res.success && res.data) { const d = res.data; document.getElementById("stats-total-sales").textContent = formatCurrency(d.revenue?.total_revenue || 0); document.getElementById("stats-active-users").textContent = d.users?.total_customers || 0; document.getElementById("stats-pending-shops").textContent = d.shops?.pending_shops || 0; document.getElementById("stats-open-tickets").textContent = d.support?.open_tickets || 0; } const ordersRes = await OrdersAPI.getAllOrders(); console.log("Orders API response:", ordersRes); const ordersBody = document.getElementById("recent-orders-body"); if (ordersRes.success && ordersRes.data && ordersRes.data.length > 0) { const recentOrders = ordersRes.data.slice(0, 5); ordersBody.innerHTML = recentOrders.map((o) => `<tr><td style="font-family:monospace;color:var(--hq-text-muted)">#${o.id}</td><td style="font-weight:500">${(o.customer_first_name || '') + ' ' + (o.customer_last_name || '') || o.customer_name || 'Khách hàng'}</td><td>${formatCurrency(o.total_amount)}</td><td><span class="badge badge-info">${getStatusLabel(o.status)}</span></td></tr>`).join(""); } else { ordersBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có đơn hàng gần đây</td></tr>'; } } catch (e) { console.error("loadDashboardData error:", e); } }
+    async function loadStoresData() { const tbody = document.getElementById("stores-table-body"); tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td></tr>'; try { const res = await AdminAPI.getShops(); console.log("Shops API response:", res); if (res.success && res.data) { if (res.data.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có cửa hàng</td></tr>'; else tbody.innerHTML = res.data.map((s) => `<tr><td style="font-weight:500">${s.shop_name}</td><td style="color:var(--hq-text-muted)">${s.owner_name || 'N/A'}</td><td><span class="badge ${getShopStatusBadge(s.status)}">${getShopStatusLabel(s.status)}</span></td><td>${s.status === "pending" ? `<button onclick="updateShopStatus(${s.id}, 'approved')" class="btn btn-sm" style="color:var(--hq-success);margin-right:0.5rem;">Duyệt</button><button onclick="updateShopStatus(${s.id}, 'rejected')" class="btn btn-sm" style="color:var(--hq-sale);">Từ chối</button>` : `<button onclick="openShopModal(${s.id}, '${(s.shop_name||'').replace(/'/g,"\\'")}', '${s.status}', ${s.commission_rate || 0})" class="btn btn-sm" style="color:var(--hq-primary);">Xem</button>`}</td></tr>`).join(""); } } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--hq-sale)">Lỗi</td></tr>'; } }
+    async function updateShopStatus(id, status) { if (!confirm("Xác nhận thay đổi trạng thái?")) return; try { await AdminAPI.updateShopStatus(id, status); loadStoresData(); showToast("Thành công", "Đã cập nhật trạng thái", "success"); } catch (e) { showToast("Lỗi", "Không thể cập nhật", "error"); } }
+    async function loadProductsData() { const tbody = document.getElementById("products-table-body"); tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td></tr>'; try { const res = await ProductsAPI.getAllProductsAdmin(); console.log("Products Admin API response:", res); if (res.success && res.data) { if (res.data.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có sản phẩm</td></tr>'; else tbody.innerHTML = res.data.map((p) => `<tr><td style="font-weight:500">${p.name}</td><td style="color:var(--hq-text-muted)">${p.shop_name || 'N/A'}</td><td>${formatCurrency(p.price)}</td><td><span class="badge ${p.status === "approved" ? "badge-success" : p.status === "rejected" ? "badge-error" : "badge-warning"}">${getStatusLabel(p.status)}</span></td><td style="white-space:nowrap"><button onclick="viewProductDetail(${p.id})" class="btn btn-sm" style="color:var(--hq-primary);margin-right:0.25rem;">Chi tiết</button>${p.status === "pending" ? `<button onclick="updateProductStatus(${p.id}, 'approved')" class="btn btn-sm" style="color:var(--hq-success);margin-right:0.25rem;">Duyệt</button>` : ""}<button onclick="updateProductStatus(${p.id}, 'rejected')" class="btn btn-sm" style="color:var(--hq-sale);">Từ chối</button></td></tr>`).join(""); } } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--hq-sale)">Lỗi</td></tr>'; } }
+    async function updateProductStatus(id, status) { if (!confirm("Xác nhận thao tác?")) return; try { await ProductsAPI.updateProductStatus(id, status); showToast('Thành công', 'Đã cập nhật trạng thái sản phẩm', 'success'); loadProductsData(); } catch (e) { showToast('Lỗi', e.message, 'error'); } }
+    async function viewProductDetail(id) {
+      try {
+        const res = await ProductsAPI.getProduct(id);
+        if (!res.success || !res.data) { showToast('Lỗi', 'Không tìm thấy sản phẩm', 'error'); return; }
+        const p = res.data;
+        const productImg = p.image || p.image_url || (p.images && p.images.length > 0 ? p.images[0].image_url : null);
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.id = 'product-detail-modal';
+        modal.innerHTML = `
+            <div class="modal-backdrop" onclick="this.parentElement.remove()"></div>
+            <div class="modal-dialog"><div class="modal-content-wrapper"><div class="modal-panel" style="max-width:36rem;max-height:90vh;overflow-y:auto;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+                <h3 class="card-title" style="margin:0;">Chi tiết sản phẩm</h3>
+                <button onclick="document.getElementById('product-detail-modal').remove()" style="color:var(--hq-text-muted)"><span class="material-symbols-outlined">close</span></button>
+              </div>
+              ${productImg ? `<img src="${productImg}" style="width:100%;max-height:300px;object-fit:cover;border-radius:var(--hq-radius-md);margin-bottom:1rem;border:1px solid var(--hq-border);">` : '<div style="width:100%;height:200px;background:var(--hq-bg);border-radius:var(--hq-radius-md);display:flex;align-items:center;justify-content:center;color:var(--hq-text-light);margin-bottom:1rem;"><span class="material-symbols-outlined" style="font-size:3rem">image</span></div>'}
+              <h2 style="font-size:1.125rem;font-weight:700;color:var(--hq-text);margin-bottom:0.5rem;">${p.name}</h2>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <span class="badge ${p.status === 'approved' ? 'badge-success' : p.status === 'rejected' ? 'badge-error' : 'badge-warning'}">${getStatusLabel(p.status)}</span>
+                ${p.category_name ? `<span class="badge badge-info">${p.category_name}</span>` : ''}
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+                <div style="background:var(--hq-bg);padding:0.75rem;border-radius:var(--hq-radius);"><div style="font-size:0.6875rem;color:var(--hq-text-muted);text-transform:uppercase;letter-spacing:0.05em;">Giá</div><div style="font-size:1.125rem;font-weight:700;color:var(--hq-primary);">${formatCurrency(p.price)}</div></div>
+                <div style="background:var(--hq-bg);padding:0.75rem;border-radius:var(--hq-radius);"><div style="font-size:0.6875rem;color:var(--hq-text-muted);text-transform:uppercase;letter-spacing:0.05em;">Tồn kho</div><div style="font-size:1.125rem;font-weight:700;color:var(--hq-text);">${p.stock_quantity || 0}</div></div>
+                <div style="background:var(--hq-bg);padding:0.75rem;border-radius:var(--hq-radius);"><div style="font-size:0.6875rem;color:var(--hq-text-muted);text-transform:uppercase;letter-spacing:0.05em;">Đã bán</div><div style="font-size:1.125rem;font-weight:700;color:var(--hq-text);">${p.sold_quantity || p.total_sold || 0}</div></div>
+                <div style="background:var(--hq-bg);padding:0.75rem;border-radius:var(--hq-radius);"><div style="font-size:0.6875rem;color:var(--hq-text-muted);text-transform:uppercase;letter-spacing:0.05em;">Cửa hàng</div><div style="font-size:0.875rem;font-weight:600;color:var(--hq-text);">${p.shop_name || 'N/A'}</div></div>
+              </div>
+              ${p.description ? `<div style="margin-bottom:1rem;"><div style="font-size:0.75rem;font-weight:600;color:var(--hq-text-muted);text-transform:uppercase;margin-bottom:0.375rem;">Mô tả</div><p style="font-size:0.875rem;color:var(--hq-text-secondary);line-height:1.6;">${p.description}</p></div>` : ''}
+              ${p.status === 'pending' ? `<div style="display:flex;gap:0.5rem;padding-top:0.75rem;border-top:1px solid var(--hq-border);"><button onclick="updateProductStatus(${p.id},'approved');document.getElementById('product-detail-modal').remove()" class="btn btn-primary" style="flex:1;">Duyệt sản phẩm</button><button onclick="updateProductStatus(${p.id},'rejected');document.getElementById('product-detail-modal').remove()" class="btn btn-secondary" style="flex:1;color:var(--hq-sale);border-color:var(--hq-sale);">Từ chối</button></div>` : ''}
+            </div></div></div>`;
+        document.body.appendChild(modal);
+      } catch (e) { showToast('Lỗi', 'Không thể tải sản phẩm', 'error'); }
+    }
+    async function loadOrdersData() { const tbody = document.getElementById("orders-table-body"); tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td></tr>'; try { const res = await OrdersAPI.getAllOrders(); if (res.success && res.data) { if (res.data.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có đơn hàng</td></tr>'; else tbody.innerHTML = res.data.map((o) => `<tr><td style="font-family:monospace;color:var(--hq-text-muted)">#${o.id}</td><td style="font-weight:500">${(o.customer_first_name || '') + ' ' + (o.customer_last_name || '') || o.customer_name || 'Khách hàng'}</td><td>${formatCurrency(o.total_amount)}</td><td style="color:var(--hq-text-muted)">${formatDate(o.created_at)}</td><td><span class="badge badge-info">${getStatusLabel(o.status)}</span></td></tr>`).join(""); } } catch (e) { console.error(e); } }
+    async function loadCustomersData() { const tbody = document.getElementById("customers-table-body"); tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td></tr>'; try { const res = await CustomersAPI.getAllCustomers(); console.log("Customers API response:", res); if (res.success && res.data) { if (res.data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có khách hàng</td></tr>'; } else { tbody.innerHTML = res.data.map((c) => `<tr><td style="font-weight:500">${c.first_name || ""} ${c.last_name || c.name || ""}</td><td style="color:var(--hq-text-muted)">${c.email}</td><td style="text-transform:capitalize">${c.role || "customer"}</td><td><span class="badge ${c.status === "active" ? "badge-success" : "badge-error"}">${c.status === "active" ? "Hoạt động" : c.status === "banned" ? "Bị khóa" : (c.status || "Hoạt động")}</span></td><td><button onclick="openCustomerModal('${c.id}', '${c.first_name || ""} ${c.last_name || ""}', '${c.status || "active"}')" class="btn btn-sm" style="color:var(--hq-primary);">Sửa</button></td></tr>`).join(""); } } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-sale)">' + (res.message || "Failed to load customers") + "</td></tr>"; } } catch (e) { console.error("loadCustomersData error:", e); tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-sale)">Error loading customers</td></tr>'; } }
+    async function loadShopsData() { const tbody = document.getElementById("stores-table-body"); tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td></tr>'; try { const res = await AdminAPI.getShops(); if (res.success && res.data) { if (res.data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có cửa hàng</td></tr>'; } else { tbody.innerHTML = res.data.map((s) => `<tr><td style="font-weight:500">${s.shop_name || s.name}</td><td style="color:var(--hq-text-muted)">${s.owner_name || 'N/A'}</td><td><span class="badge ${getShopStatusBadge(s.status)}">${getShopStatusLabel(s.status)}</span></td><td><button onclick="openShopModal('${s.id}', '${s.shop_name || s.name}', '${s.status}', ${s.commission_rate || 0})" class="btn btn-sm" style="color:var(--hq-primary);">Sửa</button></td></tr>`).join(""); } } else { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-sale)">Failed to load shops</td></tr>'; } } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--hq-sale)">Error</td></tr>'; } }
+    let initialShopId = null; let initialCustomerId = null;
+    function openShopModal(id, name, status, commission) { initialShopId = id; document.getElementById("shop-modal").classList.add("active"); document.getElementById("shop-name").value = name; document.getElementById("shop-status").value = status; document.getElementById("shop-commission").value = commission; }
+    function closeShopModal() { document.getElementById("shop-modal").classList.remove("active"); initialShopId = null; }
+    async function saveShop() { const status = document.getElementById("shop-status").value; const commission = document.getElementById("shop-commission").value; if (!status || !commission) return alert("All fields required"); try { const res = await AdminAPI.updateShopStatus(initialShopId, status, commission); if (res.success) { closeShopModal(); loadShopsData(); showToast("Success", "Shop updated", "success"); } else { alert(res.message); } } catch (e) { alert("Error updating shop"); } }
+    function openCustomerModal(id, name, status) { initialCustomerId = id; document.getElementById("customer-modal").classList.add("active"); document.getElementById("cust-name").value = name; document.getElementById("cust-status").value = status; }
+    function closeCustomerModal() { document.getElementById("customer-modal").classList.remove("active"); initialCustomerId = null; }
+    async function saveCustomer() { const status = document.getElementById("cust-status").value; try { const res = await AdminAPI.updateCustomerStatus(initialCustomerId, status); if (res.success) { closeCustomerModal(); loadCustomersData(); showToast("Success", "Customer updated", "success"); } else { alert(res.message); } } catch (e) { alert("Error"); } }
+    let revenueChartInstance = null; let orderStatusChartInstance = null;
+    async function loadFinanceData() { try { const [financeRes, ordersRes] = await Promise.all([AdminAPI.getFinance(), OrdersAPI.getAllOrders()]); console.log("Finance View - Finance API:", financeRes); console.log("Finance View - Orders API:", ordersRes); let totalRevenue = 0; let totalOrders = 0; let orders = []; if (financeRes.success && financeRes.data) { totalRevenue = Number(financeRes.data.revenue?.total_revenue || 0); } if (ordersRes.success && ordersRes.data) { orders = ordersRes.data; totalOrders = orders.length; if (totalRevenue === 0 && orders.length > 0) { totalRevenue = orders.reduce((sum, order) => sum + Number(order.total_amount || 0), 0); } } document.getElementById("finance-revenue").textContent = formatCurrency(totalRevenue); document.getElementById("finance-orders").textContent = totalOrders; const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0; document.getElementById("finance-avg-order").textContent = formatCurrency(avgOrderValue); const commission = totalRevenue * 0.1; document.getElementById("finance-commission").textContent = formatCurrency(commission); const revenueByDate = {}; const statusCounts = { pending: 0, confirmed: 0, shipped: 0, delivered: 0, cancelled: 0 }; const shopRevenue = {}; orders.forEach((order) => { const status = order.status || "pending"; statusCounts[status] = (statusCounts[status] || 0) + 1; const date = formatDate(order.created_at); revenueByDate[date] = (revenueByDate[date] || 0) + Number(order.total_amount || 0); const shopId = order.shop_id || "unknown"; const shopName = order.shop_business_name || order.shop_name || `Shop #${shopId}`; if (!shopRevenue[shopId]) { shopRevenue[shopId] = { name: shopName, revenue: 0, orders: 0, commission: 0 }; } shopRevenue[shopId].revenue += Number(order.total_amount || 0); shopRevenue[shopId].orders += 1; shopRevenue[shopId].commission += Number(order.total_amount || 0) * 0.1; }); const revenueCtx = document.getElementById("revenueChart").getContext("2d"); const sortedDates = Object.keys(revenueByDate).sort((a, b) => new Date(a) - new Date(b)); const revenueData = sortedDates.map((d) => revenueByDate[d]); if (revenueChartInstance) revenueChartInstance.destroy(); const transactionBody = document.getElementById("finance-transactions-body"); if (transactionBody) { const transactions = orders.slice(0, 10).map((o) => ({ id: "TRX-" + o.id, type: "Order Payment", amount: o.total_amount, status: o.status === "cancelled" ? "Failed" : "Completed", date: o.created_at })); if (transactions.length > 0) { transactionBody.innerHTML = transactions.map((t) => `<tr><td style="font-family:monospace;color:var(--hq-text-muted);font-size:0.75rem">${t.id}</td><td style="font-weight:500">${t.type}</td><td style="color:${t.status === "Completed" ? "var(--hq-success)" : "var(--hq-sale)"}">${t.status === "Completed" ? "+" : ""}${formatCurrency(t.amount)}</td><td><span class="badge ${t.status === "Completed" ? "badge-success" : "badge-error"}">${t.status === "Completed" ? "Hoàn thành" : "Thất bại"}</span></td><td style="color:var(--hq-text-muted)">${formatDate(t.date)}</td></tr>`).join(""); } else { transactionBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có giao dịch</td></tr>'; } } revenueChartInstance = new Chart(revenueCtx, { type: "line", data: { labels: sortedDates, datasets: [{ label: "Doanh thu (₫)", data: revenueData, borderColor: "#2563EB", backgroundColor: "rgba(37, 99, 235, 0.1)", tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: "#64748B" } } }, scales: { y: { beginAtZero: true, grid: { color: "#E2E8F0" }, ticks: { color: "#64748B" } }, x: { grid: { color: "#E2E8F0" }, ticks: { color: "#64748B" } } } } }); const statusCtx = document.getElementById("orderStatusChart").getContext("2d"); const statusData = [statusCounts["pending"] || 0, statusCounts["confirmed"] || 0, statusCounts["shipped"] || statusCounts["shipping"] || 0, statusCounts["delivered"] || 0, statusCounts["cancelled"] || 0]; if (orderStatusChartInstance) orderStatusChartInstance.destroy(); orderStatusChartInstance = new Chart(statusCtx, { type: "doughnut", data: { labels: ["Chờ xử lý", "Đã xác nhận", "Đang giao", "Đã giao", "Đã hủy"], datasets: [{ data: statusData, backgroundColor: ["#f59e0b", "#3b82f6", "#8b5cf6", "#10b981", "#ef4444"], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#64748B" } } } } }); const topShopsBody = document.getElementById("top-shops-body"); const sortedShops = Object.values(shopRevenue).sort((a, b) => b.revenue - a.revenue).slice(0, 5); if (sortedShops.length === 0) { topShopsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Chưa có dữ liệu</td></tr>'; } else { topShopsBody.innerHTML = sortedShops.map((s, index) => `<tr><td style="color:var(--hq-text-muted)">#${index + 1}</td><td style="font-weight:500">${s.name}</td><td>${s.orders}</td><td style="color:var(--hq-success)">${formatCurrency(s.revenue)}</td><td style="color:var(--hq-warning)">${formatCurrency(s.commission)}</td></tr>`).join(""); } } catch (e) { console.error("loadFinanceData error:", e); document.getElementById("top-shops-body").innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-sale)">Lỗi tải dữ liệu tài chính</td></tr>'; } }
+    async function loadSupportData() { const tbody = document.getElementById("support-table-body"); try { const res = await SupportAPI.getAllTickets(); if (res.success && res.data) { if (res.data.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có ticket</td></tr>'; else tbody.innerHTML = res.data.map((t) => `<tr><td style="font-family:monospace;color:var(--hq-text-muted)">#${t.id}</td><td style="font-weight:500">${t.subject}</td><td>${t.priority}</td><td>${getStatusLabel(t.status)}</td><td><button onclick="window.location.href='ticketPage.html?id=${t.id}'" class="btn btn-sm" style="color:var(--hq-primary);">Xem</button></td></tr>`).join(""); } } catch (e) { console.error(e); } }
+    async function loadReviewsData() { const tbody = document.getElementById("reviews-table-body"); tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td></tr>'; try { const res = await ReviewsAPI.getAllReviews(); if (res.success && res.data) { if (res.data.length === 0) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có đánh giá</td></tr>'; else tbody.innerHTML = res.data.map((r) => `<tr><td style="font-weight:500">${r.product_name || "Product"}</td><td style="color:var(--hq-text-muted)">${r.customer_name || "Customer"}</td><td><div style="color:var(--hq-rating)">${"\u2605".repeat(r.rating)}${"\u2606".repeat(5 - r.rating)}</div></td><td style="color:var(--hq-text-muted);max-width:12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.comment || ""}</td><td><span class="badge ${r.status === "approved" ? "badge-success" : "badge-warning"}">${getStatusLabel(r.status)}</span></td><td>${r.status === "pending" ? `<button onclick="updateReviewStatus(${r.id}, 'approved')" class="btn btn-sm" style="color:var(--hq-success);margin-right:0.5rem;">Duyệt</button>` : ""}<button onclick="updateReviewStatus(${r.id}, 'hidden')" class="btn btn-sm" style="color:var(--hq-sale);">Ẩn</button></td></tr>`).join(""); } } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--hq-sale)">Lỗi tải đánh giá</td></tr>'; } }
+    async function updateReviewStatus(id, status) { if (!confirm("Update review status?")) return; try { await ReviewsAPI.updateReviewStatus(id, status); showToast("Success", "Review updated", "success"); loadReviewsData(); } catch (e) { showToast("Error", e.message, "error"); } }
+    async function loadPromotionsData() { const tbody = document.getElementById("promotions-table-body"); tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td></tr>'; try { const res = await PromotionsAPI.getAllPromotions(); if (res.success && res.data) { if (res.data.length === 0) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có khuyến mãi</td></tr>'; else tbody.innerHTML = res.data.map((p) => `<tr><td style="font-weight:500">${p.name}</td><td style="font-family:monospace;color:var(--hq-primary)">${p.code || p.coupon_code || "-"}</td><td>${p.type === 'percentage' ? p.value + '%' : formatCurrency(p.value)}</td><td style="color:var(--hq-text-muted)">${p.end_date ? formatDate(p.end_date) : "N/A"}</td><td><span class="badge ${p.is_active ? "badge-success" : "badge-warning"}">${p.is_active ? "Hoạt động" : "Tắt"}</span></td><td><button onclick="deletePromotion(${p.id})" class="btn btn-sm" style="color:var(--hq-sale);">Xóa</button></td></tr>`).join(""); } } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--hq-sale)">Lỗi tải khuyến mãi</td></tr>'; } }
+    function openPromotionModal() { document.getElementById("promo-name").value = ""; document.getElementById("promo-code").value = ""; document.getElementById("promo-discount").value = ""; document.getElementById("promo-end-date").value = ""; document.getElementById("promotionModal").classList.add("active"); }
+    function closePromotionModal() { document.getElementById("promotionModal").classList.remove("active"); }
+    async function savePromotion(e) { e.preventDefault(); const data = { name: document.getElementById("promo-name").value, coupon_code: document.getElementById("promo-code").value.toUpperCase(), discount_percent: parseInt(document.getElementById("promo-discount").value), end_date: document.getElementById("promo-end-date").value }; try { const res = await PromotionsAPI.createSystemPromotion(data); if (res.success) { showToast("Success", "Promotion created", "success"); closePromotionModal(); loadPromotionsData(); } else { showToast("Error", res.message, "error"); } } catch (e) { showToast("Error", e.message, "error"); } }
+    async function deletePromotion(id) { if (!confirm("Delete this promotion?")) return; try { await PromotionsAPI.deletePromotion(id); showToast("Success", "Promotion deleted", "success"); loadPromotionsData(); } catch (e) { showToast("Error", e.message, "error"); } }
+    async function sendNotification() { const userId = document.getElementById("notif-user-id").value; const title = document.getElementById("notif-title").value; const message = document.getElementById("notif-message").value; if (!userId || !title || !message) { showToast("Error", "Please fill all fields", "error"); return; } try { const res = await NotificationsAPI.sendNotification({ userId, title, message }); if (res.success) { showToast("Success", "Notification sent", "success"); document.getElementById("notif-user-id").value = ""; document.getElementById("notif-title").value = ""; document.getElementById("notif-message").value = ""; } else { showToast("Error", res.message, "error"); } } catch (e) { showToast("Error", e.message, "error"); } }
+    async function sendBulkNotification() { const role = document.getElementById("bulk-role").value; const title = document.getElementById("bulk-title").value; const message = document.getElementById("bulk-message").value; if (!title || !message) { showToast("Error", "Please fill all fields", "error"); return; } try { const res = await NotificationsAPI.sendBulkNotification({ role, title, message }); if (res.success) { showToast("Success", "Notifications sent to all users", "success"); document.getElementById("bulk-title").value = ""; document.getElementById("bulk-message").value = ""; } else { showToast("Error", res.message, "error"); } } catch (e) { showToast("Error", e.message, "error"); } }
+    async function loadCategoriesData() { const tbody = document.getElementById("categories-table-body"); tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Đang tải...</td></tr>'; try { const res = await CategoriesAPI.getAllCategories(); if (res.success && res.data) { if (res.data.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có danh mục</td></tr>'; else tbody.innerHTML = res.data.map((c) => `<tr><td style="font-family:monospace;color:var(--hq-text-muted)">#${c.id}</td><td style="font-weight:500">${c.name}</td><td style="color:var(--hq-text-muted);max-width:12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.description || "-"}</td><td>${c.product_count || 0}</td><td><button onclick="editCategory(${c.id}, '${c.name}', '${c.description || ""}')" class="btn btn-sm" style="color:var(--hq-primary);margin-right:0.5rem;">Sửa</button><button onclick="deleteCategory(${c.id})" class="btn btn-sm" style="color:var(--hq-sale);">Xóa</button></td></tr>`).join(""); } } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-sale)">Lỗi tải danh mục</td></tr>'; } }
+    function openCategoryModal() { document.getElementById("category-id").value = ""; document.getElementById("category-name").value = ""; document.getElementById("category-description").value = ""; document.getElementById("category-modal-title").textContent = "Thêm danh mục"; document.getElementById("categoryModal").classList.add("active"); }
+    function editCategory(id, name, description) { document.getElementById("category-id").value = id; document.getElementById("category-name").value = name; document.getElementById("category-description").value = description; document.getElementById("category-modal-title").textContent = "Sửa danh mục"; document.getElementById("categoryModal").classList.add("active"); }
+    function closeCategoryModal() { document.getElementById("categoryModal").classList.remove("active"); }
+    async function checkAuth() { if (!AuthAPI.checkAuth("admin")) return; const user = TokenService.getUser(); if (user) { const name = user.name || "User"; document.getElementById("dropdown-user-name").textContent = name; document.getElementById("dropdown-user-email").textContent = user.email || ""; const initial = (name)[0].toUpperCase(); document.getElementById("header-user-initial").textContent = initial; if (document.getElementById("sidebar-user-initial")) document.getElementById("sidebar-user-initial").textContent = initial; if (document.getElementById("sidebar-user-name")) document.getElementById("sidebar-user-name").textContent = name; updateNotificationBadge(); } }
+    function toggleNotifications() { const dropdown = document.getElementById("nav-notif-dropdown"); dropdown.classList.toggle("hidden"); if (!dropdown.classList.contains("hidden")) { loadHeaderNotifications(); } }
+    function toggleUserDropdown(event) { event.stopPropagation(); const dropdown = document.getElementById("user-dropdown-menu"); if (dropdown.classList.contains("active")) { dropdown.classList.remove("active"); } else { dropdown.classList.add("active"); } }
+    document.addEventListener("click", (e) => { if (!e.target.closest(".btn-icon") && !e.target.closest("#nav-notif-dropdown") && !e.target.closest("#user-dropdown-btn") && !e.target.closest("#user-dropdown-menu")) { document.getElementById("nav-notif-dropdown").classList.add("hidden"); const dd = document.getElementById("user-dropdown-menu"); if (dd) dd.classList.remove("active"); } });
+    async function updateNotificationBadge() { try { const res = await NotificationsAPI.getNotifications(); if (res.success && res.data) { const unreadCount = res.data.filter(n => !n.is_read).length; const badge = document.getElementById('admin-notif-badge') || document.getElementById('nav-notif-badge'); if (badge) { if (unreadCount > 0) { badge.textContent = unreadCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } } } } catch (e) { console.error('Notification error:', e); } }
+    async function loadHeaderNotifications() { const list = document.getElementById("nav-notif-list"); try { const res = await NotificationsAPI.getNotifications(); if (res.success && res.data.length > 0) { list.innerHTML = res.data.slice(0, 5).map((n) => `<div style="padding:0.75rem 1rem;border-bottom:1px solid var(--hq-border-light);cursor:pointer;${!n.is_read ? "background:var(--hq-primary-bg);" : ""}"><p style="font-size:0.8125rem;font-weight:500;color:var(--hq-text)">${n.title}</p><p style="font-size:0.75rem;color:var(--hq-text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.message}</p></div>`).join(""); } else { list.innerHTML = '<div style="padding:1.5rem;text-align:center;font-size:0.75rem;color:var(--hq-text-muted)">Không có thông báo</div>'; } } catch (e) { } }
+    async function markAllNotificationsRead() { try { await NotificationsAPI.markAllRead(); document.getElementById("nav-notif-badge").classList.add("hidden"); loadHeaderNotifications(); } catch (e) { } }
+    async function saveCategory(e) { e.preventDefault(); const id = document.getElementById("category-id").value; const data = { name: document.getElementById("category-name").value, description: document.getElementById("category-description").value }; try { let res; if (id) { res = await CategoriesAPI.updateCategory(id, data); } else { res = await CategoriesAPI.createCategory(data); } if (res.success) { showToast("Success", id ? "Category updated" : "Category created", "success"); closeCategoryModal(); loadCategoriesData(); } else { showToast("Error", res.message, "error"); } } catch (e) { showToast("Error", e.message, "error"); } }
+    async function deleteCategory(id) { if (!confirm("Delete this category?")) return; try { await CategoriesAPI.deleteCategory(id); showToast("Success", "Category deleted", "success"); loadCategoriesData(); } catch (e) { showToast("Error", e.message, "error"); } }
+    async function loadPermissionsData() { try { const res = await AdminAPI.getAdmins(); if (res.success) { renderStaffTable(res.data.admins); } } catch (e) { console.error(e); showToast("Error", "Failed to load staff", "error"); } }
+    let staffDataCache = [];
+    function renderStaffTable(admins) { const tbody = document.getElementById("staff-table-body"); if (!tbody) return; staffDataCache = admins; if (admins.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--hq-text-muted)">Không có nhân viên</td></tr>'; return; } tbody.innerHTML = admins.map((admin, idx) => { const perms = admin.permissions || []; return `<tr><td><div style="display:flex;align-items:center;gap:0.75rem;"><div style="width:2rem;height:2rem;border-radius:var(--hq-radius-full);background:linear-gradient(135deg,var(--hq-primary),var(--hq-secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.75rem;text-transform:uppercase;">${admin.first_name?.[0] || "U"}</div><div><div style="font-weight:500;color:var(--hq-text)">${admin.first_name} ${admin.last_name}</div><div style="font-size:0.75rem;color:var(--hq-text-muted)">${admin.email}</div></div></div></td><td><div style="font-weight:500">${admin.position || "Nhân viên"}</div><div style="font-size:0.75rem;color:var(--hq-text-muted)">${perms.length} quyền</div></td><td>${admin.department || "Chung"}</td><td><span class="badge ${admin.status === "active" ? "badge-success" : "badge-error"}">${admin.status === "active" ? "Hoạt động" : "Không hoạt động"}</span></td><td><button onclick="openPermFromCache(${idx})" class="btn btn-sm" style="color:var(--hq-primary);">Phân quyền</button></td></tr>`; }).join(""); }
+    function openPermFromCache(idx) { const admin = staffDataCache[idx]; if (!admin) return; openPermModal(admin.id, (admin.first_name || '') + ' ' + (admin.last_name || ''), admin.position || '', admin.permissions || []); }
+
+    // Permission Modal Functions
+    const ALL_PERMISSIONS = ['manage_shops', 'manage_products', 'manage_orders', 'manage_customers', 'manage_reviews', 'manage_promotions', 'manage_support', 'manage_finance', 'manage_categories', 'manage_notifications', 'manage_staff'];
+    const PERM_LABELS = { manage_shops: 'Quản lý cửa hàng', manage_products: 'Quản lý sản phẩm', manage_orders: 'Quản lý đơn hàng', manage_customers: 'Quản lý khách hàng', manage_reviews: 'Quản lý đánh giá', manage_promotions: 'Quản lý khuyến mãi', manage_support: 'Quản lý hỗ trợ', manage_finance: 'Quản lý tài chính', manage_categories: 'Quản lý danh mục', manage_notifications: 'Quản lý thông báo', manage_staff: 'Quản lý nhân viên' };
+    let editingStaffId = null;
+
+    function openPermModal(id, name, position, permsStr) {
+      editingStaffId = id;
+      document.getElementById('perm-staff-name').value = name;
+      document.getElementById('perm-position').value = position || '';
+      let permsArray = [];
+      try { permsArray = typeof permsStr === 'string' ? JSON.parse(permsStr) : (permsStr || []); } catch (e) { permsArray = []; }
+      const container = document.getElementById('perm-checkboxes');
+      container.innerHTML = ALL_PERMISSIONS.map(p => `<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.8125rem;color:var(--hq-text-secondary);cursor:pointer;"><input type="checkbox" value="${p}" ${permsArray.includes(p) ? 'checked' : ''} style="accent-color:var(--hq-primary);"> ${PERM_LABELS[p] || p}</label>`).join('');
+      document.getElementById('permissionModal').classList.add('active');
+    }
+    function closePermModal() { document.getElementById('permissionModal').classList.remove('active'); }
+    async function savePermissions() {
+      const perms = Array.from(document.querySelectorAll('#perm-checkboxes input:checked')).map(cb => cb.value);
+      const position = document.getElementById('perm-position').value;
+      try {
+        const res = await AdminAPI.updatePermissions(editingStaffId, perms, position);
+        if (res.success) { closePermModal(); loadPermissionsData(); showToast('Thành công', 'Đã cập nhật quyền hạn', 'success'); }
+        else showToast('Lỗi', res.message || 'Không thể cập nhật', 'error');
+      } catch (e) { showToast('Lỗi', e.message, 'error'); }
+    }
+  </script>
+</body>
+
+</html>

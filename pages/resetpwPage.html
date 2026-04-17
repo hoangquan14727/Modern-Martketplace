@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HQMart - Quên mật khẩu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="../js/toast.js" defer></script>
+    <script src="../js/api.js"></script>
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/login.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
+  </head>
+  <body>
+    <div class="auth-page">
+      <div class="auth-hero">
+        <div class="auth-hero-logo">HQ<span style="font-weight:400">Mart</span></div>
+        <h1 class="auth-hero-title">Khôi phục tài khoản</h1>
+        <p class="auth-hero-desc">Chúng tôi sẽ gửi link đặt lại mật khẩu qua email cho bạn.</p>
+      </div>
+
+      <div class="auth-form-panel">
+        <div class="auth-form-container">
+          <a href="loginPage.html" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--hq-text-muted);font-size:0.8125rem;margin-bottom:1.5rem"><span class="material-symbols-outlined" style="font-size:1rem">arrow_back</span>Quay lại đăng nhập</a>
+          <div class="auth-form-header">
+            <h2 class="auth-form-title">Quên mật khẩu?</h2>
+            <p class="auth-form-subtitle">Nhập email để nhận link đặt lại mật khẩu.</p>
+          </div>
+
+          <form id="forgot-password-form">
+            <div class="auth-input-group">
+              <label class="auth-input-label" for="email">Email</label>
+              <div class="auth-input-wrapper">
+                <span class="material-symbols-outlined auth-input-icon">mail</span>
+                <input class="auth-input" id="email" type="email" placeholder="email@example.com" required />
+              </div>
+            </div>
+            <button class="auth-submit-btn" type="submit">Gửi link đặt lại</button>
+          </form>
+
+          <div id="error-message" class="auth-message error hidden" style="margin-top:1rem"></div>
+          <div id="success-message" class="auth-message success hidden" style="margin-top:1rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.fonts.ready.then(() => document.body.classList.add('font-loaded'));
+      document.getElementById('forgot-password-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const errorDiv = document.getElementById('error-message');
+        const successDiv = document.getElementById('success-message');
+        const btn = this.querySelector('button[type="submit"]');
+        errorDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+        if (!email) { errorDiv.textContent = 'Vui lòng nhập email'; errorDiv.classList.remove('hidden'); return; }
+        const originalText = btn.textContent;
+        btn.textContent = 'Đang gửi...';
+        btn.disabled = true;
+        try {
+          await AuthAPI.forgotPassword(email);
+          successDiv.textContent = 'Kiểm tra email để nhận link đặt lại mật khẩu. Link sẽ hết hạn sau 15 phút.';
+          successDiv.classList.remove('hidden');
+          document.getElementById('email').value = '';
+          setTimeout(() => window.location.href = 'loginPage.html', 3000);
+        } catch(e) {
+          successDiv.textContent = 'Kiểm tra email để nhận link đặt lại mật khẩu.';
+          successDiv.classList.remove('hidden');
+        } finally { btn.textContent = originalText; btn.disabled = false; }
+      });
+    </script>
+  </body>
+</html>

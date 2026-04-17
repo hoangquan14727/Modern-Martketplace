@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HQMart - Flash Sale ⚡</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>tailwind.config={theme:{extend:{colors:{hq:{primary:'#2563EB','primary-hover':'#1D4ED8','primary-light':'#DBEAFE','primary-bg':'#EFF6FF',secondary:'#60A5FA',dark:'#0F172A',sale:'#EF4444',success:'#10B981',warning:'#F59E0B',rating:'#F59E0B'}},fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <script src="../js/toast.js" defer></script>
+    <script src="../js/countdown.js"></script>
+    <script src="../js/api.js"></script>
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/navbar.css" />
+    <link rel="stylesheet" href="../css/flashsale.css" />
+    <link rel="stylesheet" href="../css/home.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
+  </head>
+  <body style="display:flex;flex-direction:column;min-height:100vh;">
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-content">
+          <a href="homePage.html" class="brand-link"><span class="brand-name"><span class="brand-hq">HQ</span><span class="brand-mart">Mart</span></span></a>
+          <div class="nav-links">
+            <a href="homePage.html" class="nav-link">Trang chủ</a>
+            <a href="productPage.html" class="nav-link">Sản phẩm</a>
+            <a href="flashSalePage.html" class="nav-link active" style="color:var(--hq-sale);font-weight:600;">⚡ Flash Sale</a>
+          </div>
+          <div class="nav-search">
+            <div class="search-input-wrapper">
+              <span class="material-symbols-outlined search-icon">search</span>
+              <input type="text" class="search-input" placeholder="Tìm kiếm sản phẩm..." autocomplete="off" onkeypress="if(event.key==='Enter')window.location.href='productPage.html?search='+this.value" />
+              <button class="search-btn" onclick="window.location.href='productPage.html?search='+document.querySelector('.search-input').value"><span class="material-symbols-outlined">search</span></button>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <button class="nav-icon-btn" onclick="window.location.href='ticketPage.html'" title="Tin nhắn"><span class="material-symbols-outlined">chat</span><span id="msg-badge" class="nav-badge-count hidden">0</span></button>
+            <button class="nav-icon-btn" onclick="window.location.href='cartPage.html'"><span class="material-symbols-outlined">shopping_cart</span><span id="cart-badge" class="nav-badge-count hidden">0</span></button>
+            <div id="auth-buttons" class="auth-buttons hidden">
+              <a href="loginPage.html" class="btn-login">Đăng nhập</a>
+              <a href="signupPage.html" class="btn-register">Đăng ký</a>
+            </div>
+            <div id="user-menu" class="user-menu hidden">
+              <button class="user-menu-btn"><div class="user-avatar" id="user-avatar">U</div></button>
+              <div class="user-dropdown">
+                <div class="user-dropdown-card">
+                  <div class="user-dropdown-header"><p class="user-name" id="menu-user-name">User</p><p class="user-email" id="menu-user-email"></p></div>
+                  <a href="customerPage.html?tab=overview" id="dashboard-link" class="user-dropdown-link"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+                  <div class="user-dropdown-divider"></div>
+                  <button onclick="logout()" class="user-dropdown-link user-dropdown-btn logout"><span class="material-symbols-outlined">logout</span> Đăng xuất</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO BANNER -->
+    <section class="fs-hero" style="background:linear-gradient(135deg,#DC2626 0%,#EF4444 40%,#F97316 100%),url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1400&q=80');background-size:cover;background-blend-mode:overlay;">
+      <div class="fs-hero-inner" style="display:flex;align-items:center;justify-content:space-between;gap:2rem;text-align:left;">
+        <div style="flex:1;">
+          <div id="hero-badge" style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.15);backdrop-filter:blur(4px);padding:0.375rem 0.875rem;border-radius:var(--hq-radius-full);font-size:0.8125rem;font-weight:600;margin-bottom:1rem;">
+            <span style="font-size:1.25rem;">⚡</span> Đang diễn ra
+          </div>
+          <h1 class="fs-hero-title" style="text-align:left;line-height:1.1;">FLASH<br/>SALE</h1>
+          <p id="hero-subtitle" class="fs-hero-subtitle" style="text-align:left;max-width:400px;">Giảm đến 50% cho hàng ngàn sản phẩm. Số lượng có hạn — nhanh tay kẻo hết!</p>
+          <div style="display:flex;gap:1.5rem;margin-top:1.25rem;">
+            <div style="text-align:center;"><div style="font-size:1.5rem;font-weight:800;" id="hero-deal-count">0</div><div style="font-size:0.6875rem;opacity:0.8;">Deals</div></div>
+            <div style="width:1px;background:rgba(255,255,255,0.2);"></div>
+            <div style="text-align:center;"><div style="font-size:1.5rem;font-weight:800;" id="hero-sold-count">0</div><div style="font-size:0.6875rem;opacity:0.8;">Đã bán</div></div>
+            <div style="width:1px;background:rgba(255,255,255,0.2);"></div>
+            <div style="text-align:center;"><div style="font-size:1.5rem;font-weight:800;">50%</div><div style="font-size:0.6875rem;opacity:0.8;">Giảm tối đa</div></div>
+          </div>
+        </div>
+        <div style="flex-shrink:0;">
+          <div style="font-size:0.75rem;font-weight:500;opacity:0.8;margin-bottom:0.5rem;text-align:center;" id="fs-countdown-label">Kết thúc sau</div>
+          <div class="fs-countdown">
+            <span class="fs-countdown-unit" id="fs-h">00</span>
+            <span class="fs-countdown-sep">:</span>
+            <span class="fs-countdown-unit" id="fs-m">00</span>
+            <span class="fs-countdown-sep">:</span>
+            <span class="fs-countdown-unit" id="fs-s">00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIME SLOTS -->
+    <div class="fs-timeslots">
+      <div class="fs-timeslots-inner" id="timeslots-bar"></div>
+    </div>
+
+    <!-- CONTENT -->
+    <main class="fs-content" style="flex:1;">
+      <!-- Category Filters -->
+      <div class="fs-filters" id="fs-category-filters">
+        <button class="fs-filter active" data-cat="all">Tất cả</button>
+        <button class="fs-filter" data-cat="Electronics">📱 Điện tử</button>
+        <button class="fs-filter" data-cat="Fashion">👕 Thời trang</button>
+        <button class="fs-filter" data-cat="Home & Living">🏠 Nhà cửa</button>
+        <button class="fs-filter" data-cat="Beauty">💄 Sắc đẹp</button>
+        <button class="fs-filter" data-cat="Sports">⚽ Thể thao</button>
+        <button class="fs-filter" data-cat="Books">📚 Sách</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="fs-stats">
+        <div class="fs-stats-left">
+          <div class="fs-stat"><span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--hq-sale)">local_fire_department</span><span id="fs-total-products" class="fs-stat-value">0</span> sản phẩm đang giảm</div>
+          <div class="fs-stat"><span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--hq-warning)">groups</span><span id="fs-total-sold" class="fs-stat-value">0</span> đã bán hôm nay</div>
+        </div>
+        <div style="font-size:0.8125rem;color:var(--hq-text-muted)">Cập nhật mỗi 5 phút</div>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="fs-grid" id="fs-product-grid">
+        <!-- Skeleton loading -->
+        <div class="fs-card"><div class="skeleton" style="aspect-ratio:1"></div><div style="padding:0.75rem"><div class="skeleton" style="height:0.875rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1.125rem;width:60%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:2rem"></div></div></div>
+        <div class="fs-card"><div class="skeleton" style="aspect-ratio:1"></div><div style="padding:0.75rem"><div class="skeleton" style="height:0.875rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1.125rem;width:60%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:2rem"></div></div></div>
+        <div class="fs-card"><div class="skeleton" style="aspect-ratio:1"></div><div style="padding:0.75rem"><div class="skeleton" style="height:0.875rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1.125rem;width:60%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:2rem"></div></div></div>
+        <div class="fs-card"><div class="skeleton" style="aspect-ratio:1"></div><div style="padding:0.75rem"><div class="skeleton" style="height:0.875rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1.125rem;width:60%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:2rem"></div></div></div>
+        <div class="fs-card"><div class="skeleton" style="aspect-ratio:1"></div><div style="padding:0.75rem"><div class="skeleton" style="height:0.875rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1.125rem;width:60%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;margin-bottom:0.5rem"></div><div class="skeleton" style="height:2rem"></div></div></div>
+      </div>
+
+      <!-- Load More -->
+      <div class="fs-load-more" id="fs-load-more" style="display:none">
+        <button class="btn btn-secondary btn-lg" onclick="loadMore()">Xem thêm sản phẩm</button>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div><div class="footer-heading" style="font-size:1.25rem;font-weight:800;"><span style="color:#60A5FA;">HQ</span>Mart</div><p style="color:#94A3B8;font-size:0.8125rem;line-height:1.6;">Nền tảng mua sắm trực tuyến hàng đầu.</p></div>
+          <div><h4 class="footer-heading">Trang chính</h4><a href="homePage.html" class="footer-link">Trang chủ</a><a href="productPage.html" class="footer-link">Sản phẩm</a><a href="flashSalePage.html" class="footer-link">Flash Sale</a></div>
+          <div><h4 class="footer-heading">Hỗ trợ</h4><a href="ticketPage.html" class="footer-link">Trung tâm trợ giúp</a><a href="privacyPage.html" class="footer-link">Chính sách bảo mật</a></div>
+          <div><h4 class="footer-heading">Kết nối</h4><a href="#" class="footer-link">Facebook</a><a href="#" class="footer-link">Instagram</a></div>
+        </div>
+        <div class="footer-bottom">© 2026 HQMart. All rights reserved.</div>
+      </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="material-symbols-outlined">keyboard_arrow_up</span></button>
+
+    <script>
+      document.fonts.ready.then(() => document.body.classList.add('font-loaded'));
+
+      // Back to top
+      window.addEventListener('scroll', () => {
+        const btn = document.getElementById('back-to-top');
+        if (window.scrollY > 300) btn.classList.add('visible'); else btn.classList.remove('visible');
+      });
+
+      // ===== TIME SLOTS (shared module) =====
+      const TIME_SLOTS = FlashSaleTimer.TIME_SLOTS;
+      let activeSlot = FlashSaleTimer.getCurrentSlotIndex();
+
+      function getCurrentSlotIndex() { return FlashSaleTimer.getCurrentSlotIndex(); }
+      function getSlotEndTime(idx) { return FlashSaleTimer.getSlotEndTime(idx); }
+      function getSlotStartTime(idx) { return FlashSaleTimer.getSlotStartTime(idx); }
+      function getSlotState() { return FlashSaleTimer.getSlotState(activeSlot); }
+
+      function renderTimeSlots() {
+        const bar = document.getElementById('timeslots-bar');
+        const currentIdx = getCurrentSlotIndex();
+        bar.innerHTML = TIME_SLOTS.map((slot, i) => {
+          let cls = 'fs-timeslot';
+          let statusText = 'Sắp diễn ra';
+          if (i < currentIdx) { cls += ' past'; statusText = '✓ Đã kết thúc'; }
+          else if (i === currentIdx) { statusText = '● Đang diễn ra'; }
+          // Chỉ 1 slot được active — slot user đã chọn
+          if (i === activeSlot) cls += ' active';
+          return `
+            <button class="${cls}" onclick="selectSlot(${i})">
+              <div class="fs-timeslot-time">${slot.label}</div>
+              <div class="fs-timeslot-status">${statusText}</div>
+            </button>`;
+        }).join('');
+      }
+
+      function selectSlot(idx) {
+        activeSlot = idx;
+        renderTimeSlots();
+        updateHeroBanner();
+        updateCountdown();
+        loadFlashSaleProducts();
+      }
+
+      // ===== COUNTDOWN (uses shared module) =====
+      function updateCountdown() {
+        const info = FlashSaleTimer.getCountdownTarget(activeSlot);
+        const cd = FlashSaleTimer.formatCountdown(info.target);
+        const countdownLabel = document.getElementById('fs-countdown-label');
+        if (countdownLabel) countdownLabel.textContent = info.label;
+        document.getElementById('fs-h').textContent = cd.h;
+        document.getElementById('fs-m').textContent = cd.m;
+        document.getElementById('fs-s').textContent = cd.s;
+      }
+      setInterval(updateCountdown, 1000);
+      updateCountdown();
+
+      // ===== HERO BANNER UPDATE =====
+      function updateHeroBanner() {
+        const state = getSlotState();
+        const badge = document.getElementById('hero-badge');
+        const subtitle = document.getElementById('hero-subtitle');
+        const slotLabel = TIME_SLOTS[activeSlot]?.label || '';
+        if (state === 'current') {
+          badge.innerHTML = '<span style="font-size:1.25rem;">⚡</span> Đang diễn ra';
+          subtitle.textContent = 'Giảm đến 50% cho hàng ngàn sản phẩm. Số lượng có hạn — nhanh tay kẻo hết!';
+        } else if (state === 'upcoming') {
+          badge.innerHTML = '<span style="font-size:1.25rem;">⏰</span> Sắp diễn ra';
+          subtitle.textContent = `Khung giờ ${slotLabel} sắp bắt đầu — Chuẩn bị sẵn sàng!`;
+        } else {
+          badge.innerHTML = '<span style="font-size:1.25rem;">✓</span> Đã kết thúc';
+          subtitle.textContent = 'Khung giờ này đã kết thúc — Hẹn bạn khung giờ tiếp theo!';
+        }
+      }
+
+      // ===== AUTH =====
+      function checkAuth() {
+        if (typeof TokenService === 'undefined') return;
+        const user = TokenService.getUser();
+        if (user) {
+          document.getElementById('auth-buttons').classList.add('hidden');
+          document.getElementById('user-menu').classList.remove('hidden');
+          const firstName = user.firstName || user.first_name || '';
+          const lastName = user.lastName || user.last_name || '';
+          const fullName = `${firstName} ${lastName}`.trim() || user.name || 'User';
+          document.getElementById('menu-user-name').textContent = fullName;
+          document.getElementById('menu-user-email').textContent = user.email || '';
+          document.getElementById('user-avatar').textContent = ((firstName?.[0]||'U') + (lastName?.[0]||'')).toUpperCase();
+          let dashLink = 'customerPage.html?tab=overview';
+          if (user.role === 'shop') dashLink = 'shopPage.html';
+          if (user.role === 'admin') dashLink = 'adminPage.html';
+          document.getElementById('dashboard-link').href = dashLink;
+          if (user.role !== 'admin') updateCartBadge();
+          updateGlobalMsgBadge();
+        } else {
+          document.getElementById('auth-buttons').classList.remove('hidden');
+          document.getElementById('user-menu').classList.add('hidden');
+        }
+      }
+      function logout() { AuthAPI.logout(); }
+      async function updateCartBadge() { await updateGlobalCartBadge(); updateGlobalMsgBadge(); }
+
+      // ===== PRODUCTS =====
+      let allProducts = [];
+      let displayedCount = 20;
+      let selectedCategory = 'all';
+
+      // Seeded random — delegate to shared module
+      function seededRandom(seed, min, max) {
+        return FlashSaleTimer.seededRandom(seed, min, max);
+      }
+
+      async function loadFlashSaleProducts() {
+        const grid = document.getElementById('fs-product-grid');
+        try {
+          const res = await ProductsAPI.getAllProducts({ limit: 200 });
+          if (res.success && res.data) {
+            // Seed fallback values 1 lần duy nhất per product
+            // Ưu tiên products có original_price thật (đang giảm giá), fallback cho products không có
+            allProducts = res.data.map(p => {
+              if (!p.original_price) {
+                // Chỉ tạo fallback nếu cần — products không có original_price vẫn hiện nhưng ở cuối
+                const multiplier = 1 + (seededRandom(p.id * 3, 10, 60) / 100);
+                p._fallbackOriginalPrice = Math.round(Number(p.price) * multiplier);
+                p._hasRealDiscount = false;
+              } else {
+                p._hasRealDiscount = true;
+              }
+              p._fallbackSold = p.total_sold || seededRandom(p.id * 7, 20, 250);
+              return p;
+            });
+            // Sort: products có discount thật lên trước
+            allProducts.sort((a, b) => (b._hasRealDiscount ? 1 : 0) - (a._hasRealDiscount ? 1 : 0));
+            displayedCount = 20;
+            filterAndRender();
+          } else {
+            grid.innerHTML = '<div class="fs-empty"><div class="fs-empty-icon">😢</div><h3 style="font-size:1.25rem;font-weight:600;color:var(--hq-text)">Chưa có sản phẩm Flash Sale</h3><p style="color:var(--hq-text-muted);margin-top:0.5rem">Quay lại sau nhé!</p></div>';
+          }
+        } catch(e) {
+          grid.innerHTML = '<div class="fs-empty"><div class="fs-empty-icon">⚠️</div><h3 style="font-size:1.25rem;font-weight:600;color:var(--hq-text)">Không thể tải sản phẩm</h3><p style="color:var(--hq-text-muted);margin-top:0.5rem">Kiểm tra kết nối và thử lại.</p></div>';
+        }
+      }
+
+      function filterAndRender() {
+        let filtered = allProducts;
+        if (selectedCategory !== 'all') {
+          filtered = filtered.filter(p => (p.category_name || p.category || '').includes(selectedCategory));
+        }
+
+        // Stats — depends on slot state
+        const slotSt = getSlotState();
+        const totalSold = slotSt === 'upcoming' ? 0 : filtered.reduce((s, p) => s + (p.total_sold || p._fallbackSold || 0), 0);
+        document.getElementById('fs-total-products').textContent = filtered.length;
+        document.getElementById('fs-total-sold').textContent = totalSold.toLocaleString('vi-VN');
+        const heroDeals = document.getElementById('hero-deal-count');
+        const heroSold = document.getElementById('hero-sold-count');
+        if (heroDeals) heroDeals.textContent = filtered.length;
+        if (heroSold) heroSold.textContent = totalSold.toLocaleString('vi-VN');
+
+        const toShow = filtered.slice(0, displayedCount);
+        const grid = document.getElementById('fs-product-grid');
+
+        if (toShow.length === 0) {
+          grid.innerHTML = '<div class="fs-empty"><div class="fs-empty-icon">🔍</div><h3 style="font-size:1.125rem;font-weight:600;color:var(--hq-text)">Không tìm thấy sản phẩm</h3><p style="color:var(--hq-text-muted);margin-top:0.5rem">Thử chọn danh mục khác.</p></div>';
+          document.getElementById('fs-load-more').style.display = 'none';
+          return;
+        }
+
+        const slotState = getSlotState();
+
+        grid.innerHTML = toShow.map(p => {
+          const price = Number(p.price);
+          const originalPrice = p.original_price ? Number(p.original_price) : (p._fallbackOriginalPrice || price * 1.3);
+          const discount = Math.round((1 - price / originalPrice) * 100);
+          const stock = p.stock_quantity || 50;
+          const name = p.name.length > 45 ? p.name.substring(0, 42) + '...' : p.name;
+
+          // Sold data depends on slot state
+          let sold, totalQty, soldPct, progressText, buttonHtml;
+
+          if (slotState === 'upcoming') {
+            // Chưa bắt đầu — 0 đã bán
+            sold = 0;
+            totalQty = stock;
+            soldPct = 0;
+            progressText = 'Sắp mở bán';
+            buttonHtml = `<button class="fs-buy-btn" onclick="event.stopPropagation();showToast('Đã đặt nhắc','Bạn sẽ được thông báo khi Flash Sale bắt đầu','success')" style="background:var(--hq-warning);"><span class="material-symbols-outlined" style="font-size:1rem">notifications_active</span> Nhắc tôi</button>`;
+          } else if (slotState === 'past') {
+            // Đã kết thúc — hiện data bán, nút disabled
+            sold = p.total_sold || p._fallbackSold || 50;
+            totalQty = sold + stock;
+            soldPct = Math.min(99, Math.max(5, Math.round((sold / totalQty) * 100)));
+            progressText = `Đã bán ${sold}/${totalQty}`;
+            buttonHtml = `<button class="fs-buy-btn" disabled>Đã kết thúc</button>`;
+          } else {
+            // Đang diễn ra — hiện data bán, nút mua
+            sold = p.total_sold || p._fallbackSold || 50;
+            totalQty = sold + stock;
+            soldPct = Math.min(99, Math.max(5, Math.round((sold / totalQty) * 100)));
+            progressText = `Đã bán ${sold}/${totalQty}`;
+            const isOut = stock <= 0;
+            buttonHtml = isOut
+              ? `<button class="fs-buy-btn" disabled>Hết hàng</button>`
+              : `<button class="fs-buy-btn" onclick="event.stopPropagation();addToCart(${p.id})"><span class="material-symbols-outlined" style="font-size:1rem">flash_on</span> Mua ngay</button>`;
+          }
+
+          const isOut = slotState === 'current' && stock <= 0;
+
+          return `
+          <div class="fs-card" onclick="window.location.href='productPage.html?id=${p.id}'">
+            <div class="fs-card-image" style="${p.image || p.image_url ? `background-image:url('${p.image || p.image_url}')` : 'background:var(--hq-primary-light)'}">
+              <span class="fs-card-badge">-${discount}%</span>
+              ${isOut ? '<div class="fs-card-soldout">HẾT HÀNG</div>' : ''}
+            </div>
+            <div class="fs-card-info">
+              <div class="fs-card-name">${name}</div>
+              <div class="fs-card-prices">
+                <span class="fs-card-sale-price">₫${price.toLocaleString('vi-VN')}</span>
+                <span class="fs-card-original-price">₫${Math.round(originalPrice).toLocaleString('vi-VN')}</span>
+              </div>
+              <div class="fs-progress">
+                <div class="fs-progress-bar" style="width:${soldPct}%"></div>
+                <div class="fs-progress-text">${progressText}</div>
+              </div>
+              ${buttonHtml}
+            </div>
+          </div>`;
+        }).join('');
+
+        // Load more
+        const loadMoreEl = document.getElementById('fs-load-more');
+        loadMoreEl.style.display = displayedCount < filtered.length ? 'block' : 'none';
+      }
+
+      function loadMore() {
+        displayedCount += 20;
+        filterAndRender();
+      }
+
+      // Category filters
+      document.getElementById('fs-category-filters').addEventListener('click', (e) => {
+        const btn = e.target.closest('.fs-filter');
+        if (!btn) return;
+        document.querySelectorAll('.fs-filter').forEach(f => f.classList.remove('active'));
+        btn.classList.add('active');
+        selectedCategory = btn.dataset.cat;
+        displayedCount = 20;
+        filterAndRender();
+      });
+
+      // Add to cart
+      async function addToCart(id) {
+        const user = TokenService.getUser();
+        if (!user) { window.location.href = 'loginPage.html'; return; }
+        try {
+          const res = await CartAPI.addToCart(id, 1);
+          if (res.success) { showToast('Thành công', 'Đã thêm vào giỏ hàng', 'success'); updateCartBadge(); }
+          else showToast('Lỗi', res.message || 'Không thể thêm', 'error');
+        } catch(e) { showToast('Lỗi', e.message, 'error'); }
+      }
+
+      // ===== INIT =====
+      document.addEventListener('DOMContentLoaded', async () => {
+        checkAuth();
+        renderTimeSlots();
+        await loadFlashSaleProducts();
+      });
+    </script>
+  </body>
+</html>

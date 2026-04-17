@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HQMart - The Future of Shopping</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              hq: { primary: '#2563EB', 'primary-hover': '#1D4ED8', 'primary-light': '#DBEAFE', 'primary-bg': '#EFF6FF', secondary: '#60A5FA', dark: '#0F172A', sale: '#EF4444', success: '#10B981', warning: '#F59E0B', rating: '#F59E0B' }
+            },
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+          },
+        },
+      };
+    </script>
+    <script src="../js/toast.js" defer></script>
+    <script src="../js/reveal.js" defer></script>
+    <script src="../js/countdown.js"></script>
+    <script src="../js/api.js"></script>
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/navbar.css" />
+    <link rel="stylesheet" href="../css/home.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
+  </head>
+  <body>
+    <!-- ===== HEADER ===== -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-container">
+        <div class="nav-content">
+          <!-- Brand -->
+          <a href="homePage.html" class="brand-link">
+            <span class="brand-name"><span class="brand-hq">HQ</span><span class="brand-mart">Mart</span></span>
+          </a>
+
+          <!-- Nav links -->
+          <div class="nav-links">
+            <div class="mega-menu-trigger">
+              <a class="nav-link">Danh mục <span class="material-symbols-outlined" style="font-size:1.125rem">expand_more</span></a>
+              <div class="mega-menu">
+                <div class="mega-menu-inner">
+                <div class="mega-menu-grid">
+                  <a class="mega-menu-item" href="productPage.html?category=electronics"><div class="mega-menu-icon">📱</div><span class="mega-menu-label">Điện tử</span></a>
+                  <a class="mega-menu-item" href="productPage.html?category=fashion"><div class="mega-menu-icon">👕</div><span class="mega-menu-label">Thời trang</span></a>
+                  <a class="mega-menu-item" href="productPage.html?category=home"><div class="mega-menu-icon">🏠</div><span class="mega-menu-label">Nhà cửa</span></a>
+                  <a class="mega-menu-item" href="productPage.html?category=beauty"><div class="mega-menu-icon">💄</div><span class="mega-menu-label">Sắc đẹp</span></a>
+                  <a class="mega-menu-item" href="productPage.html?category=sports"><div class="mega-menu-icon">⚽</div><span class="mega-menu-label">Thể thao</span></a>
+                  <a class="mega-menu-item" href="productPage.html?category=books"><div class="mega-menu-icon">📚</div><span class="mega-menu-label">Sách</span></a>
+                  <a class="mega-menu-item" href="productPage.html?category=automotive"><div class="mega-menu-icon">🚗</div><span class="mega-menu-label">Xe cộ</span></a>
+                  <a class="mega-menu-item" href="productPage.html"><div class="mega-menu-icon">📋</div><span class="mega-menu-label">Tất cả</span></a>
+                </div>
+                </div>
+              </div>
+            </div>
+            <a href="productPage.html" class="nav-link">Sản phẩm</a>
+            <a href="flashSalePage.html" class="nav-link" style="color:var(--hq-sale);font-weight:600;">⚡ Flash Sale</a>
+          </div>
+
+          <!-- Search -->
+          <div class="nav-search">
+            <div class="search-input-wrapper">
+              <span class="material-symbols-outlined search-icon">search</span>
+              <input type="text" class="search-input" placeholder="Tìm kiếm sản phẩm..." id="search-input" autocomplete="off" />
+              <button class="search-btn" id="search-btn"><span class="material-symbols-outlined">search</span></button>
+            </div>
+            <div class="search-suggestions" id="search-suggestions">
+              <div class="search-section-title">Tìm kiếm phổ biến</div>
+              <div class="search-suggestion-item" data-term="iPhone 15"><span class="material-symbols-outlined">trending_up</span><span>iPhone 15</span></div>
+              <div class="search-suggestion-item" data-term="Áo thun oversize"><span class="material-symbols-outlined">trending_up</span><span>Áo thun oversize</span></div>
+              <div class="search-suggestion-item" data-term="Tai nghe bluetooth"><span class="material-symbols-outlined">trending_up</span><span>Tai nghe bluetooth</span></div>
+              <div class="search-suggestion-item" data-term="Bàn phím cơ"><span class="material-symbols-outlined">trending_up</span><span>Bàn phím cơ</span></div>
+              <div class="search-suggestion-item" data-term="Son môi"><span class="material-symbols-outlined">trending_up</span><span>Son môi</span></div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="nav-actions">
+            <button class="nav-icon-btn" onclick="window.location.href='ticketPage.html'" title="Tin nhắn"><span class="material-symbols-outlined">chat</span><span id="msg-badge" class="nav-badge-count hidden">0</span></button>
+            <button class="nav-icon-btn" onclick="window.location.href='cartPage.html'" title="Giỏ hàng">
+              <span class="material-symbols-outlined">shopping_cart</span>
+              <span id="cart-badge" class="nav-badge-count hidden">0</span>
+            </button>
+
+            <!-- Auth buttons (logged out) -->
+            <div id="auth-buttons" class="auth-buttons hidden">
+              <a href="loginPage.html" class="btn-login">Đăng nhập</a>
+              <a href="signupPage.html" class="btn-register">Đăng ký</a>
+            </div>
+
+            <!-- User menu (logged in) -->
+            <div id="user-menu" class="user-menu hidden">
+              <button class="user-menu-btn">
+                <div class="user-avatar" id="user-avatar">U</div>
+              </button>
+              <div class="user-dropdown">
+                <div class="user-dropdown-card">
+                  <div class="user-dropdown-header">
+                    <p class="user-name" id="menu-user-name">User</p>
+                    <p class="user-email" id="menu-user-email">email@example.com</p>
+                  </div>
+                  <a href="customerPage.html?tab=overview" id="dashboard-link" class="user-dropdown-link">
+                    <span class="material-symbols-outlined">dashboard</span> Dashboard
+                  </a>
+                  <a href="customerPage.html?tab=settings" class="user-dropdown-link">
+                    <span class="material-symbols-outlined">person</span> Tài khoản
+                  </a>
+                  <a href="customerPage.html?tab=orders" class="user-dropdown-link">
+                    <span class="material-symbols-outlined">shopping_bag</span> Đơn hàng
+                  </a>
+                  <div class="user-dropdown-divider"></div>
+                  <button onclick="logout()" class="user-dropdown-link user-dropdown-btn logout">
+                    <span class="material-symbols-outlined">logout</span> Đăng xuất
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile menu button -->
+          <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <!-- ===== HERO BANNER CAROUSEL ===== -->
+      <section class="hero-section">
+        <div class="hero-layout">
+          <div class="hero-main-banner" id="hero-carousel">
+            <!-- Slide 1: Electronics -->
+            <div class="hero-slide active">
+              <div class="hero-slide-bg" style="background-image: url('https://images.unsplash.com/photo-1468495244123-6c6c332eeece?auto=format&fit=crop&w=1400&q=80');"></div>
+              <div class="hero-slide-overlay" style="background: linear-gradient(135deg, rgba(37,99,235,0.85), rgba(29,78,216,0.9));"></div>
+              <div class="hero-slide-content">
+                <span class="hero-slide-badge">🔥 Hot Deal</span>
+                <h2 class="hero-slide-title">Giảm đến 50%<br/>Điện tử & Phụ kiện</h2>
+                <p class="hero-slide-desc">Ưu đãi cực lớn cho mùa mua sắm. Số lượng có hạn!</p>
+                <a href="productPage.html" class="hero-slide-btn">Mua ngay <span class="material-symbols-outlined" style="font-size:1.125rem">arrow_forward</span></a>
+              </div>
+            </div>
+            <!-- Slide 2: Fashion -->
+            <div class="hero-slide">
+              <div class="hero-slide-bg" style="background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1400&q=80');"></div>
+              <div class="hero-slide-overlay" style="background: linear-gradient(135deg, rgba(124,58,237,0.85), rgba(91,33,182,0.9));"></div>
+              <div class="hero-slide-content">
+                <span class="hero-slide-badge">✨ Mới</span>
+                <h2 class="hero-slide-title">Thời trang<br/>Xu hướng 2026</h2>
+                <p class="hero-slide-desc">Bộ sưu tập mới nhất từ các thương hiệu hàng đầu.</p>
+                <a href="productPage.html?category=fashion" class="hero-slide-btn">Khám phá <span class="material-symbols-outlined" style="font-size:1.125rem">arrow_forward</span></a>
+              </div>
+            </div>
+            <!-- Slide 3: Free Shipping -->
+            <div class="hero-slide">
+              <div class="hero-slide-bg" style="background-image: url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=80');"></div>
+              <div class="hero-slide-overlay" style="background: linear-gradient(135deg, rgba(5,150,105,0.85), rgba(4,120,87,0.9));"></div>
+              <div class="hero-slide-content">
+                <span class="hero-slide-badge">🏷️ Voucher</span>
+                <h2 class="hero-slide-title">Miễn phí vận chuyển<br/>Toàn quốc</h2>
+                <p class="hero-slide-desc">Áp dụng cho tất cả đơn hàng từ ₫200.000</p>
+                <a href="productPage.html" class="hero-slide-btn">Xem ưu đãi <span class="material-symbols-outlined" style="font-size:1.125rem">arrow_forward</span></a>
+              </div>
+            </div>
+            <!-- Navigation Arrows -->
+            <button class="hero-nav-btn hero-prev" onclick="prevSlide()"><span class="material-symbols-outlined">chevron_left</span></button>
+            <button class="hero-nav-btn hero-next" onclick="nextSlide()"><span class="material-symbols-outlined">chevron_right</span></button>
+            <!-- Dots -->
+            <div class="hero-dots" id="hero-dots">
+              <span class="hero-dot active" data-slide="0"></span>
+              <span class="hero-dot" data-slide="1"></span>
+              <span class="hero-dot" data-slide="2"></span>
+            </div>
+          </div>
+          <div class="hero-side-banners">
+            <div class="hero-side-banner" style="background: linear-gradient(135deg, rgba(245,158,11,0.88), rgba(217,119,6,0.92)), url('https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;" onclick="window.location.href='productPage.html'">
+              <span class="hero-side-title">Voucher ₫100K</span>
+              <span class="hero-side-desc">Đơn từ ₫500K</span>
+            </div>
+            <div class="hero-side-banner" style="background: linear-gradient(135deg, rgba(239,68,68,0.88), rgba(220,38,38,0.92)), url('https://images.unsplash.com/photo-1586880244406-556ebe35f282?auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center;" onclick="window.location.href='productPage.html'">
+              <span class="hero-side-title">Miễn phí ship</span>
+              <span class="hero-side-desc">Toàn quốc</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CATEGORY ICONS BAR ===== -->
+      <section class="category-bar">
+        <div class="category-bar-inner">
+          <div class="category-grid">
+            <a class="category-item" href="productPage.html?category=electronics"><div class="category-icon">📱</div><span class="category-label">Điện tử</span></a>
+            <a class="category-item" href="productPage.html?category=fashion"><div class="category-icon">👕</div><span class="category-label">Thời trang</span></a>
+            <a class="category-item" href="productPage.html?category=home"><div class="category-icon">🏠</div><span class="category-label">Nhà cửa</span></a>
+            <a class="category-item" href="productPage.html?category=beauty"><div class="category-icon">💄</div><span class="category-label">Sắc đẹp</span></a>
+            <a class="category-item" href="productPage.html?category=sports"><div class="category-icon">⚽</div><span class="category-label">Thể thao</span></a>
+            <a class="category-item" href="productPage.html?category=books"><div class="category-icon">📚</div><span class="category-label">Sách</span></a>
+            <a class="category-item" href="productPage.html?category=automotive"><div class="category-icon">🚗</div><span class="category-label">Xe cộ</span></a>
+            <a class="category-item" href="productPage.html?category=gaming"><div class="category-icon">🎮</div><span class="category-label">Gaming</span></a>
+            <a class="category-item" href="productPage.html?category=food"><div class="category-icon">🍔</div><span class="category-label">Ăn uống</span></a>
+            <a class="category-item" href="productPage.html"><div class="category-icon">📋</div><span class="category-label">Tất cả</span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== FLASH SALE ===== -->
+      <section class="home-section" id="flash-sale" style="scroll-margin-top:4.5rem;">
+        <div class="flash-sale-card">
+          <div class="flash-sale-header">
+            <div class="flash-sale-title">
+              <span class="flash-sale-label">⚡ FLASH SALE</span>
+              <span class="flash-sale-slot-label" id="flash-sale-slot-label"></span>
+              <div class="countdown" id="countdown">
+                <span class="countdown-unit" id="countdown-h">00</span>
+                <span class="countdown-sep">:</span>
+                <span class="countdown-unit" id="countdown-m">00</span>
+                <span class="countdown-sep">:</span>
+                <span class="countdown-unit" id="countdown-s">00</span>
+              </div>
+            </div>
+            <a href="flashSalePage.html" class="section-link">Xem tất cả <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span></a>
+          </div>
+          <div class="scroll-nav-container">
+            <button class="scroll-nav-btn scroll-prev" onclick="scrollFlashSale(-1)"><span class="material-symbols-outlined">chevron_left</span></button>
+            <div class="flash-sale-scroll" id="flash-sale-products">
+              <!-- Rendered by JS -->
+            </div>
+            <button class="scroll-nav-btn scroll-next" onclick="scrollFlashSale(1)"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== FEATURED BRANDS ===== -->
+      <section class="home-section">
+        <div class="section-header">
+          <h2 class="section-title">Thương hiệu nổi bật</h2>
+          <a href="productPage.html" class="section-link">Xem tất cả <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span></a>
+        </div>
+        <div class="brands-grid">
+          <div class="brand-card" onclick="window.location.href='productPage.html'">
+            <div class="brand-logo">🍎</div>
+            <div class="brand-name-text">Apple</div>
+            <div class="brand-discount">Giảm 20%</div>
+          </div>
+          <div class="brand-card" onclick="window.location.href='productPage.html'">
+            <div class="brand-logo">📱</div>
+            <div class="brand-name-text">Samsung</div>
+            <div class="brand-discount">Giảm 30%</div>
+          </div>
+          <div class="brand-card" onclick="window.location.href='productPage.html'">
+            <div class="brand-logo">👟</div>
+            <div class="brand-name-text">Nike</div>
+            <div class="brand-discount">Giảm 40%</div>
+          </div>
+          <div class="brand-card" onclick="window.location.href='productPage.html'">
+            <div class="brand-logo">👔</div>
+            <div class="brand-name-text">Uniqlo</div>
+            <div class="brand-discount">Giảm 15%</div>
+          </div>
+          <div class="brand-card" onclick="window.location.href='productPage.html'">
+            <div class="brand-logo">📟</div>
+            <div class="brand-name-text">Xiaomi</div>
+            <div class="brand-discount">Giảm 25%</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== GỢI Ý HÔM NAY ===== -->
+      <section class="home-section">
+        <div class="section-header">
+          <h2 class="section-title">🎯 Gợi ý hôm nay</h2>
+          <a href="productPage.html" class="section-link">Xem thêm <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span></a>
+        </div>
+        <div class="product-grid" id="featured-products">
+          <!-- Skeleton loading -->
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+        </div>
+        <div class="load-more-section">
+          <a href="productPage.html" class="btn btn-secondary btn-lg">Xem tất cả sản phẩm</a>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-heading" style="font-size:1.25rem; font-weight:800;">
+              <span style="color:#60A5FA;">HQ</span>Mart
+            </div>
+            <p style="color:#94A3B8; font-size:0.8125rem; line-height:1.6;">Nền tảng mua sắm trực tuyến hàng đầu. Sản phẩm chính hãng, giá tốt nhất.</p>
+          </div>
+          <div>
+            <h4 class="footer-heading">Trang chính</h4>
+            <a href="homePage.html" class="footer-link">Trang chủ</a>
+            <a href="productPage.html" class="footer-link">Sản phẩm</a>
+            <a href="signupPage.html?type=seller" class="footer-link">Đăng ký bán hàng</a>
+          </div>
+          <div>
+            <h4 class="footer-heading">Hỗ trợ</h4>
+            <a href="ticketPage.html" class="footer-link">Trung tâm trợ giúp</a>
+            <a href="privacyPage.html" class="footer-link">Chính sách bảo mật</a>
+            <a href="privacyPage.html" class="footer-link">Điều khoản sử dụng</a>
+          </div>
+          <div>
+            <h4 class="footer-heading">Kết nối</h4>
+            <a href="#" class="footer-link">Facebook</a>
+            <a href="#" class="footer-link">Instagram</a>
+            <a href="#" class="footer-link">YouTube</a>
+          </div>
+        </div>
+        <div class="footer-bottom">© 2026 HQMart. All rights reserved.</div>
+      </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+      <span class="material-symbols-outlined">keyboard_arrow_up</span>
+    </button>
+
+    <script>
+      // Font loaded
+      document.fonts.ready.then(() => document.body.classList.add('font-loaded'));
+
+      // Navbar scroll effect
+      window.addEventListener('scroll', () => {
+        const btn = document.getElementById('back-to-top');
+        if (window.scrollY > 300) btn.classList.add('visible');
+        else btn.classList.remove('visible');
+      });
+
+      // Hero carousel
+      let currentSlide = 0;
+      const slides = document.querySelectorAll('.hero-slide');
+      const dots = document.querySelectorAll('.hero-dot');
+      function showSlide(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+        slides.forEach(s => s.classList.remove('active'));
+        dots.forEach(d => d.classList.remove('active'));
+        slides[index].classList.add('active');
+        dots[index].classList.add('active');
+        currentSlide = index;
+      }
+      function prevSlide() { showSlide(currentSlide - 1); }
+      function nextSlide() { showSlide(currentSlide + 1); }
+      dots.forEach(dot => dot.addEventListener('click', () => showSlide(parseInt(dot.dataset.slide))));
+      setInterval(() => showSlide(currentSlide + 1), 5000);
+
+      // Flash sale scroll arrows
+      function scrollFlashSale(direction) {
+        const container = document.getElementById('flash-sale-products');
+        if (container) container.scrollBy({ left: direction * 320, behavior: 'smooth' });
+      }
+
+      // Countdown timer — uses shared FlashSaleTimer module
+      function updateHomeCountdown() {
+        const activeSlot = FlashSaleTimer.getCurrentSlotIndex();
+        const info = FlashSaleTimer.getCountdownTarget(activeSlot);
+        const cd = FlashSaleTimer.formatCountdown(info.target);
+        document.getElementById('countdown-h').textContent = cd.h;
+        document.getElementById('countdown-m').textContent = cd.m;
+        document.getElementById('countdown-s').textContent = cd.s;
+
+        // Slot-awareness label
+        const slotLabel = document.getElementById('flash-sale-slot-label');
+        if (slotLabel) {
+          const range = FlashSaleTimer.getSlotRangeLabel(activeSlot);
+          if (info.state === 'current') {
+            slotLabel.textContent = range + ' | Kết thúc sau';
+          } else if (info.state === 'upcoming') {
+            slotLabel.textContent = range + ' | Bắt đầu sau';
+          } else {
+            slotLabel.textContent = range + ' | Đã kết thúc';
+          }
+        }
+      }
+      updateHomeCountdown();
+      setInterval(updateHomeCountdown, 1000);
+
+      // Search
+      const searchInput = document.getElementById('search-input');
+      const searchSuggestions = document.getElementById('search-suggestions');
+      const searchBtn = document.getElementById('search-btn');
+
+      function doSearch() {
+        const q = searchInput.value.trim();
+        if (q) window.location.href = `productPage.html?search=${encodeURIComponent(q)}`;
+      }
+      searchInput.addEventListener('focus', () => searchSuggestions.classList.add('active'));
+      searchInput.addEventListener('blur', () => setTimeout(() => searchSuggestions.classList.remove('active'), 200));
+      searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') doSearch(); });
+      searchBtn.addEventListener('click', doSearch);
+
+      // Click suggestion → fill input and search
+      document.querySelectorAll('.search-suggestion-item[data-term]').forEach(item => {
+        item.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          searchInput.value = item.dataset.term;
+          doSearch();
+        });
+      });
+
+      // Auth & data
+      document.addEventListener('DOMContentLoaded', async () => {
+        checkAuth();
+        await Promise.all([renderFeatured(), renderFlashSale()]);
+      });
+
+      function checkAuth() {
+        if (typeof TokenService === 'undefined') return;
+        const user = TokenService.getUser();
+        const btnContainer = document.getElementById('auth-buttons');
+        const userMenu = document.getElementById('user-menu');
+        if (user) {
+          btnContainer.classList.add('hidden');
+          userMenu.classList.remove('hidden');
+          const firstName = user.firstName || user.first_name || '';
+          const lastName = user.lastName || user.last_name || '';
+          const fullName = `${firstName} ${lastName}`.trim() || user.name || 'User';
+          const initials = (firstName?.[0] || fullName?.[0] || 'U') + (lastName?.[0] || '');
+          document.getElementById('menu-user-name').textContent = fullName;
+          document.getElementById('menu-user-email').textContent = user.email || '';
+          document.getElementById('user-avatar').textContent = initials.toUpperCase() || 'U';
+          let dashboardLink = 'customerPage.html?tab=overview';
+          if (user.role === 'shop') dashboardLink = 'shopPage.html';
+          if (user.role === 'admin') dashboardLink = 'adminPage.html';
+          document.getElementById('dashboard-link').href = dashboardLink;
+          if (user.role !== 'admin') updateCartCount();
+          updateGlobalMsgBadge();
+        } else {
+          btnContainer.classList.remove('hidden');
+          userMenu.classList.add('hidden');
+        }
+      }
+
+      function logout() { AuthAPI.logout(); }
+
+      async function updateCartCount() { await updateGlobalCartBadge(); updateGlobalMsgBadge(); }
+
+      async function renderFeatured() {
+        const container = document.getElementById('featured-products');
+        if (!container) return;
+        try {
+          const res = await ProductsAPI.getAllProducts({ limit: 10 });
+          if (res.success && res.data && res.data.length > 0) {
+            container.innerHTML = res.data.map(p => {
+              const discount = p.original_price ? Math.round((1 - p.price / p.original_price) * 100) : 0;
+              return `
+              <div class="product-card" onclick="window.location.href='productPage.html?id=${p.id}'">
+                <div class="product-card-image" style="${p.image || p.image_url ? `background-image:url('${p.image || p.image_url}')` : ''}">
+                  ${!p.image && !p.image_url ? '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--hq-text-light)"><span class="material-symbols-outlined" style="font-size:2.5rem">image</span></div>' : ''}
+                  ${discount > 0 ? `<span class="product-card-discount">-${discount}%</span>` : ''}
+                  <button class="product-card-wishlist" onclick="event.stopPropagation();addToWishlist(${p.id})"><span class="material-symbols-outlined" style="font-size:1.125rem">favorite</span></button>
+                </div>
+                <div class="product-card-info">
+                  <div class="product-card-name">${p.name.length > 50 ? p.name.substring(0, 47) + '...' : p.name}</div>
+                  <div>
+                    <span class="product-card-price">₫${Number(p.price).toLocaleString('vi-VN')}</span>
+                    ${p.original_price ? `<span class="product-card-original-price">₫${Number(p.original_price).toLocaleString('vi-VN')}</span>` : ''}
+                  </div>
+                  <div class="product-card-meta">
+                    <span class="product-card-rating">★ ${p.avg_rating ? Number(p.avg_rating).toFixed(1) : '5.0'}</span>
+                    <span class="product-card-sold">Đã bán ${p.total_sold || 0}</span>
+                  </div>
+                </div>
+              </div>`;
+            }).join('');
+          } else {
+            container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--hq-text-muted)">Chưa có sản phẩm nào.</div>';
+          }
+        } catch (e) {
+          container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--hq-sale)">Không thể tải sản phẩm.</div>';
+        }
+      }
+
+      async function renderFlashSale() {
+        const container = document.getElementById('flash-sale-products');
+        if (!container) return;
+        try {
+          const res = await ProductsAPI.getAllProducts({ limit: 8 });
+          if (res.success && res.data && res.data.length > 0) {
+            container.innerHTML = res.data.map(p => {
+              const discount = FlashSaleTimer.seededRandom(p.id * 3, 15, 55);
+              const soldPct = FlashSaleTimer.seededRandom(p.id * 7, 10, 90);
+              return `
+              <div class="flash-item" onclick="window.location.href='productPage.html?id=${p.id}'">
+                <div class="flash-item-image" style="${p.image || p.image_url ? `background-image:url('${p.image || p.image_url}')` : 'background:var(--hq-primary-light)'}">
+                  <span class="flash-item-discount">-${discount}%</span>
+                </div>
+                <div class="flash-item-info">
+                  <div class="flash-item-price">₫${Number(p.price).toLocaleString('vi-VN')}</div>
+                  <div class="flash-item-progress"><div class="flash-item-progress-bar" style="width:${soldPct}%"></div></div>
+                  <div class="flash-item-sold">Đã bán ${soldPct}%</div>
+                </div>
+              </div>`;
+            }).join('');
+          }
+        } catch (e) {}
+      }
+
+      async function addToCart(id) {
+        const user = TokenService.getUser();
+        if (!user) { window.location.href = 'loginPage.html'; return; }
+        try {
+          const res = await CartAPI.addToCart(id, 1);
+          if (res.success) { showToast('Thành công', 'Đã thêm vào giỏ hàng', 'success'); updateCartCount(); }
+          else showToast('Lỗi', res.message || 'Không thể thêm', 'error');
+        } catch (e) { showToast('Lỗi', e.message, 'error'); }
+      }
+
+      async function addToWishlist(id) {
+        const user = TokenService.getUser();
+        if (!user) { window.location.href = 'loginPage.html'; return; }
+        try {
+          const res = await CustomersAPI.addToWishlist(id);
+          if (res.success) showToast('Thành công', 'Đã thêm vào yêu thích', 'success');
+          else showToast('Thông báo', res.message || 'Sản phẩm đã trong danh sách yêu thích', 'info');
+        } catch (e) { showToast('Lỗi', e.message, 'error'); }
+      }
+    </script>
+  </body>
+</html>

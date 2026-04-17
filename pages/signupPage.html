@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HQMart - Đăng ký</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="../js/toast.js" defer></script>
+    <script src="../js/api.js"></script>
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/login.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
+  </head>
+  <body>
+    <div class="auth-page">
+      <div class="auth-hero">
+        <div class="auth-hero-logo">HQ<span style="font-weight:400">Mart</span></div>
+        <h1 class="auth-hero-title">Tạo tài khoản mới</h1>
+        <p class="auth-hero-desc">Tham gia HQMart để mua sắm và bán hàng dễ dàng.</p>
+        <div class="auth-hero-features">
+          <div class="auth-feature"><div class="auth-feature-icon"><span class="material-symbols-outlined" style="font-size:1.125rem">shopping_bag</span></div>Mua sắm an toàn & tiện lợi</div>
+          <div class="auth-feature"><div class="auth-feature-icon"><span class="material-symbols-outlined" style="font-size:1.125rem">store</span></div>Mở shop bán hàng miễn phí</div>
+          <div class="auth-feature"><div class="auth-feature-icon"><span class="material-symbols-outlined" style="font-size:1.125rem">payments</span></div>Thanh toán đa dạng</div>
+        </div>
+      </div>
+
+      <div class="auth-form-panel">
+        <div class="auth-form-container">
+          <a href="homePage.html" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--hq-text-muted);font-size:0.8125rem;margin-bottom:1.5rem"><span class="material-symbols-outlined" style="font-size:1rem">arrow_back</span>Trang chủ</a>
+          <div class="auth-form-header">
+            <h2 class="auth-form-title">Đăng ký</h2>
+            <p class="auth-form-subtitle">Tạo tài khoản HQMart miễn phí</p>
+          </div>
+
+          <form id="signup-form">
+            <div class="auth-row">
+              <div class="auth-input-group">
+                <label class="auth-input-label" for="firstname">Họ</label>
+                <div class="auth-input-wrapper">
+                  <span class="material-symbols-outlined auth-input-icon">person</span>
+                  <input class="auth-input" id="firstname" type="text" placeholder="Nguyễn" required />
+                </div>
+              </div>
+              <div class="auth-input-group">
+                <label class="auth-input-label" for="lastname">Tên</label>
+                <div class="auth-input-wrapper">
+                  <span class="material-symbols-outlined auth-input-icon">person</span>
+                  <input class="auth-input" id="lastname" type="text" placeholder="Văn A" required />
+                </div>
+              </div>
+            </div>
+            <div class="auth-input-group">
+              <label class="auth-input-label" for="email">Email</label>
+              <div class="auth-input-wrapper">
+                <span class="material-symbols-outlined auth-input-icon">mail</span>
+                <input class="auth-input" id="email" type="email" placeholder="email@example.com" required />
+              </div>
+            </div>
+            <div class="auth-input-group">
+              <label class="auth-input-label" for="password">Mật khẩu</label>
+              <div class="auth-input-wrapper">
+                <span class="material-symbols-outlined auth-input-icon">lock</span>
+                <input class="auth-input" id="password" type="password" placeholder="Ít nhất 6 ký tự" required />
+              </div>
+            </div>
+            <div class="auth-input-group">
+              <label class="auth-input-label" for="confirm-password">Xác nhận mật khẩu</label>
+              <div class="auth-input-wrapper">
+                <span class="material-symbols-outlined auth-input-icon">lock</span>
+                <input class="auth-input" id="confirm-password" type="password" placeholder="••••••••" required />
+              </div>
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-input-label">Loại tài khoản</label>
+              <div class="account-type-selector">
+                <label class="account-type-option active" id="type-customer">
+                  <input type="radio" name="accountType" value="customer" checked style="display:none">
+                  <div class="account-type-icon">🛒</div>
+                  <div class="account-type-label">Người mua</div>
+                  <div class="account-type-desc">Mua sắm trực tuyến</div>
+                </label>
+                <label class="account-type-option" id="type-seller">
+                  <input type="radio" name="accountType" value="seller" style="display:none">
+                  <div class="account-type-icon">🏪</div>
+                  <div class="account-type-label">Người bán</div>
+                  <div class="account-type-desc">Mở shop bán hàng</div>
+                </label>
+              </div>
+            </div>
+
+            <div id="shop-name-field" class="auth-input-group hidden">
+              <label class="auth-input-label" for="shopName">Tên cửa hàng</label>
+              <div class="auth-input-wrapper">
+                <span class="material-symbols-outlined auth-input-icon">storefront</span>
+                <input class="auth-input" id="shopName" type="text" placeholder="Tên shop của bạn" />
+              </div>
+            </div>
+
+            <div class="auth-terms">
+              <input type="checkbox" id="terms" />
+              <label for="terms">Tôi đồng ý với <a href="privacyPage.html">Điều khoản</a> và <a href="privacyPage.html">Chính sách bảo mật</a> của HQMart</label>
+            </div>
+            <button class="auth-submit-btn" type="submit">Tạo tài khoản</button>
+          </form>
+
+          <div class="auth-divider">Hoặc đăng ký với</div>
+          <div class="auth-social">
+            <button class="auth-social-btn"><span>Google</span></button>
+            <button class="auth-social-btn"><span>GitHub</span></button>
+          </div>
+          <p class="auth-switch">Đã có tài khoản? <a href="loginPage.html">Đăng nhập</a></p>
+          <div id="error-message" class="auth-message error hidden"></div>
+          <div id="success-message" class="auth-message success hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.fonts.ready.then(() => document.body.classList.add('font-loaded'));
+
+      // Account type toggle
+      document.querySelectorAll('.account-type-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          document.querySelectorAll('.account-type-option').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+          const val = opt.querySelector('input[name="accountType"]').value;
+          document.getElementById('shop-name-field').classList.toggle('hidden', val !== 'seller');
+        });
+      });
+
+      // Signup form
+      document.getElementById('signup-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const firstName = document.getElementById('firstname').value.trim();
+        const lastName = document.getElementById('lastname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const termsChecked = document.getElementById('terms').checked;
+        const accountType = document.querySelector('input[name="accountType"]:checked').value;
+        const errorDiv = document.getElementById('error-message');
+        const successDiv = document.getElementById('success-message');
+        const btn = this.querySelector('button[type="submit"]');
+        errorDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+
+        if (!firstName || !lastName || !email || !password || !confirmPassword) { errorDiv.textContent = 'Vui lòng điền đầy đủ thông tin'; errorDiv.classList.remove('hidden'); return; }
+        if (password.length < 6) { errorDiv.textContent = 'Mật khẩu phải ít nhất 6 ký tự'; errorDiv.classList.remove('hidden'); return; }
+        if (password !== confirmPassword) { errorDiv.textContent = 'Mật khẩu xác nhận không khớp'; errorDiv.classList.remove('hidden'); return; }
+        if (!termsChecked) { errorDiv.textContent = 'Vui lòng đồng ý với điều khoản'; errorDiv.classList.remove('hidden'); return; }
+
+        let shopName = '';
+        if (accountType === 'seller') {
+          shopName = document.getElementById('shopName').value.trim();
+          if (!shopName) { errorDiv.textContent = 'Vui lòng nhập tên cửa hàng'; errorDiv.classList.remove('hidden'); return; }
+        }
+
+        const originalText = btn.textContent;
+        btn.textContent = 'Đang tạo tài khoản...';
+        btn.disabled = true;
+
+        let res;
+        if (accountType === 'seller') res = await AuthAPI.registerShop(email, password, shopName);
+        else res = await AuthAPI.register(email, password, firstName, lastName);
+
+        if (res.success) {
+          successDiv.textContent = 'Tạo tài khoản thành công! Đang chuyển hướng...';
+          successDiv.classList.remove('hidden');
+          setTimeout(() => { window.location.href = accountType === 'seller' ? 'pendingApprovalPage.html' : 'productPage.html'; }, 1500);
+        } else {
+          errorDiv.textContent = res.message || 'Đăng ký thất bại';
+          errorDiv.classList.remove('hidden');
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

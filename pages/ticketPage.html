@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HQMart - Tin nhắn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+    <script src="../js/api.js"></script>
+    <script src="../js/toast.js" defer></script>
+    <link rel="stylesheet" href="../css/toast.css" />
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box;}
+      body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;background:#fff;color:#0F172A;}
+      @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+      @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+      /* ===== LAYOUT ===== */
+      .msg-app{display:flex;height:100vh;}
+      .sidebar{width:340px;border-right:1px solid #E2E8F0;display:flex;flex-direction:column;flex-shrink:0;background:#fff;}
+      .chat-panel{flex:1;display:flex;flex-direction:column;background:#fff;}
+
+      /* ===== SIDEBAR ===== */
+      .sidebar-header{padding:1.25rem 1.25rem 0.75rem;display:flex;align-items:center;justify-content:space-between;}
+      .sidebar-header h2{font-size:1.375rem;font-weight:800;color:#0F172A;}
+      .sidebar-header a{font-size:0.75rem;color:#2563EB;font-weight:500;text-decoration:none;}
+      .search-wrap{padding:0 1rem 0.625rem;position:relative;}
+      .search-input{width:100%;background:#F1F5F9;border:1.5px solid transparent;border-radius:20px;padding:0.5rem 0.875rem 0.5rem 2.25rem;font-size:0.8125rem;outline:none;font-family:inherit;transition:border-color 0.15s;}
+      .search-input:focus{border-color:#2563EB;background:#fff;}
+      .search-icon{position:absolute;left:1.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:1.125rem;pointer-events:none;}
+      .search-dropdown{display:none;position:absolute;left:1rem;right:1rem;top:100%;background:#fff;border:1px solid #E2E8F0;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:50;max-height:320px;overflow-y:auto;}
+      .search-dropdown.open{display:block;}
+      .search-section{padding:0.5rem 0.75rem 0.25rem;font-size:0.625rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;}
+      .search-item{display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.75rem;cursor:pointer;transition:background 0.1s;}
+      .search-item:hover{background:#F1F5F9;}
+      .search-item:last-child{border-radius:0 0 12px 12px;}
+
+      .ticket-list{flex:1;overflow-y:auto;}
+      .ticket-item{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1.25rem;cursor:pointer;border-left:3px solid transparent;transition:background 0.1s;}
+      .ticket-item:hover{background:#F8FAFC;}
+      .ticket-item.active{background:#EFF6FF;border-left-color:#2563EB;}
+      .ticket-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9375rem;flex-shrink:0;}
+      .ticket-info{flex:1;min-width:0;}
+      .ticket-name{font-weight:600;font-size:0.8125rem;color:#0F172A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+      .ticket-preview{font-size:0.75rem;color:#64748B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
+      .ticket-time{font-size:0.625rem;color:#94A3B8;flex-shrink:0;}
+      .ticket-unread{width:18px;height:18px;border-radius:50%;background:#2563EB;color:#fff;font-size:0.5625rem;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+      .ticket-empty{text-align:center;padding:3rem 1rem;color:#94A3B8;font-size:0.8125rem;}
+
+      /* Scrollbar */
+      .ticket-list::-webkit-scrollbar,.chat-messages::-webkit-scrollbar{width:5px;}
+      .ticket-list::-webkit-scrollbar-track,.chat-messages::-webkit-scrollbar-track{background:transparent;}
+      .ticket-list::-webkit-scrollbar-thumb,.chat-messages::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px;}
+
+      /* ===== CHAT PANEL ===== */
+      .chat-header{padding:0.875rem 1.25rem;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:0.75rem;flex-shrink:0;}
+      .chat-header .back-btn{display:none;color:#64748B;cursor:pointer;margin-right:0.25rem;}
+      .chat-messages{flex:1;overflow-y:auto;padding:1rem 1.25rem;background:#F1F5F9;display:flex;flex-direction:column;gap:0.25rem;}
+      .empty-state{flex:1;display:flex;align-items:center;justify-content:center;background:#F8FAFC;}
+      .empty-state-inner{text-align:center;}
+      .empty-icon{width:64px;height:64px;border-radius:50%;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
+
+      /* Input bar */
+      .input-bar{background:#fff;border-top:1px solid #E2E8F0;padding:0.5rem 1rem;flex-shrink:0;}
+      .media-btns{display:flex;align-items:center;gap:0.375rem;padding-bottom:0.5rem;}
+      .media-btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:1px solid #E2E8F0;background:#F8FAFC;color:#64748B;cursor:pointer;transition:all 0.15s;}
+      .media-btn:hover{background:#DBEAFE;color:#2563EB;border-color:#BFDBFE;}
+      .msg-form{display:flex;gap:0.75rem;align-items:center;}
+      .msg-input{flex:1;background:#F1F5F9;border:none;border-radius:20px;padding:0.5rem 1rem;font-size:0.8125rem;outline:none;font-family:inherit;}
+      .send-btn{width:36px;height:36px;border-radius:50%;background:#2563EB;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;flex-shrink:0;}
+
+      /* Recording bar */
+      .recording-bar{display:none;background:#fff;border-top:1px solid #E2E8F0;padding:0.75rem 1rem;align-items:center;gap:0.75rem;}
+      .rec-cancel{width:36px;height:36px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;}
+      .rec-dot{width:8px;height:8px;border-radius:50%;background:#EF4444;animation:pulse 1s infinite;}
+      .rec-label{font-size:0.8125rem;color:#EF4444;font-weight:500;}
+      .rec-timer{font-size:0.8125rem;color:#64748B;font-family:monospace;}
+
+      /* Lightbox */
+      #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center;cursor:pointer;}
+      #lightbox.open{display:flex;}
+      #lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain;}
+
+      /* ===== RESPONSIVE ===== */
+      @media(max-width:768px){
+        .sidebar{width:100%;position:absolute;inset:0;z-index:10;background:#fff;}
+        .chat-panel{position:absolute;inset:0;z-index:20;background:#fff;display:none;}
+        .chat-panel.open{display:flex;}
+        .chat-header .back-btn{display:flex;}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="msg-app">
+      <!-- ====== SIDEBAR ====== -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h2>Tin nhắn</h2>
+          <a href="homePage.html">← Trang chủ</a>
+        </div>
+        <div class="search-wrap">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" class="search-input" id="search-input" placeholder="Tìm ticket hoặc shop..." autocomplete="off" />
+          <div class="search-dropdown" id="search-dropdown"></div>
+        </div>
+        <div class="ticket-list" id="ticket-list">
+          <div class="ticket-empty">Đang tải...</div>
+        </div>
+      </div>
+
+      <!-- ====== CHAT PANEL ====== -->
+      <div class="chat-panel" id="chat-panel">
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-state-inner">
+            <div class="empty-icon">
+              <span class="material-symbols-outlined" style="font-size:1.75rem;color:#2563EB;">chat</span>
+            </div>
+            <p style="font-size:0.9375rem;font-weight:600;color:#0F172A;">Chọn cuộc hội thoại</p>
+            <p style="font-size:0.8125rem;color:#94A3B8;margin-top:0.25rem;">hoặc tìm shop để bắt đầu chat mới</p>
+          </div>
+        </div>
+        <!-- Chat View (hidden until ticket selected) -->
+        <div id="chat-view" style="display:none;flex-direction:column;flex:1;">
+          <!-- Chat Header -->
+          <div class="chat-header">
+            <button class="back-btn" onclick="showSidebar()"><span class="material-symbols-outlined">arrow_back</span></button>
+            <div id="cv-avatar" class="ticket-avatar" style="width:36px;height:36px;font-size:0.875rem;">?</div>
+            <div style="flex:1;min-width:0;">
+              <div id="cv-name" style="font-weight:600;font-size:0.875rem;color:#0F172A;"></div>
+              <div id="cv-subject" style="font-size:0.6875rem;color:#94A3B8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+            </div>
+          </div>
+          <!-- Messages -->
+          <div class="chat-messages" id="message-list"></div>
+          <!-- Recording Bar -->
+          <div class="recording-bar" id="recording-bar">
+            <button class="rec-cancel" onclick="cancelRecording()"><span class="material-symbols-outlined" style="font-size:1.125rem;color:#EF4444;">close</span></button>
+            <div style="flex:1;display:flex;align-items:center;gap:8px;"><div class="rec-dot"></div><span class="rec-label">Đang ghi âm...</span><span class="rec-timer" id="rec-timer">0:00</span></div>
+            <button class="send-btn" onclick="stopAndSendRecording()"><span class="material-symbols-outlined" style="font-size:1.125rem;color:#fff;">send</span></button>
+          </div>
+          <!-- Input Bar -->
+          <div class="input-bar" id="input-bar">
+            <div class="media-btns">
+              <button type="button" class="media-btn" onclick="document.getElementById('file-image').click()" title="Ảnh"><span class="material-symbols-outlined" style="font-size:1.125rem;">image</span></button>
+              <button type="button" class="media-btn" onclick="document.getElementById('file-video').click()" title="Video"><span class="material-symbols-outlined" style="font-size:1.125rem;">videocam</span></button>
+              <button type="button" class="media-btn" onclick="startRecording()" title="Ghi âm"><span class="material-symbols-outlined" style="font-size:1.125rem;">mic</span></button>
+            </div>
+            <form class="msg-form" id="reply-form">
+              <input type="text" class="msg-input" id="reply-input" placeholder="Nhập tin nhắn..." autocomplete="off" />
+              <button type="submit" class="send-btn"><span class="material-symbols-outlined" style="font-size:1.125rem;color:#fff;">send</span></button>
+            </form>
+          </div>
+          <input type="file" id="file-image" accept="image/jpeg,image/png,image/gif,image/webp" multiple style="display:none;" onchange="handleFileUpload(this.files)" />
+          <input type="file" id="file-video" accept="video/mp4,video/webm" style="display:none;" onchange="handleFileUpload(this.files)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" onclick="this.classList.remove('open')"><img id="lightbox-img" /></div>
+
+    <script>
+      // ===== STATE =====
+      let currentUserId = null;
+      let currentUserRole = null;
+      let selectedTicketId = null;
+      let ticketMessages = [];
+      let ticketLastMessageTime = null;
+      let ticketKnownMessageIds = new Set();
+      let ticketPollInterval = null;
+      let otherReadAt = null;
+      let sidebarRefreshInterval = null;
+      let allTickets = [];
+      // Recording
+      let mediaRecorder = null;
+      let recordingChunks = [];
+      let recTimerInterval = null;
+      let recSeconds = 0;
+      // Search
+      let searchTimeout = null;
+      let allShops = null;
+
+      const TICK_SENT = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5.5L3.5 8L9.5 1.5" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const TICK_READ = '<svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 5.5L3.5 8L8.5 1.5" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 5.5L7.5 8L12.5 1.5" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const AVATAR_COLORS = ['#DBEAFE:#2563EB','#FEF3C7:#D97706','#E0E7FF:#4F46E5','#FCE7F3:#DB2777','#DCFCE7:#16A34A','#FEE2E2:#DC2626','#F3E8FF:#7C3AED'];
+
+      function getAvatarColor(name) { const i = (name||'').charCodeAt(0) % AVATAR_COLORS.length; const [bg,fg] = AVATAR_COLORS[i].split(':'); return {bg,fg}; }
+      function fmtTime(d) { return new Date(d).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}); }
+      function fmtDate(d) { return new Date(d).toLocaleDateString('vi-VN',{day:'numeric',month:'short',year:'numeric'}); }
+      function fmtRelative(d) {
+        const now = new Date(), date = new Date(d), diff = now - date;
+        if (diff < 86400000 && now.getDate() === date.getDate()) return fmtTime(d);
+        if (diff < 172800000) return 'Hôm qua';
+        return date.toLocaleDateString('vi-VN',{day:'numeric',month:'short'});
+      }
+      function isSameDay(a,b) { return new Date(a).toDateString() === new Date(b).toDateString(); }
+
+      // ===== INIT =====
+      document.addEventListener('DOMContentLoaded', async () => {
+        const user = TokenService.getUser();
+        if (!user) { window.location.href = 'loginPage.html'; return; }
+        currentUserId = user.id;
+        currentUserRole = user.role;
+        await loadTicketList();
+        setupSearch();
+        const urlId = new URLSearchParams(window.location.search).get('id');
+        if (urlId) selectTicket(parseInt(urlId));
+        sidebarRefreshInterval = setInterval(loadTicketList, 15000);
+      });
+
+      // ===== SIDEBAR: TICKET LIST =====
+      async function loadTicketList() {
+        try {
+          const res = currentUserRole === 'shop'
+            ? await SupportAPI.getShopTickets()
+            : await SupportAPI.getUserTickets({limit:50});
+          if (!res.success) return;
+          allTickets = res.data || [];
+          renderTicketList(allTickets);
+        } catch(e) {}
+      }
+
+      function renderTicketList(tickets) {
+        const list = document.getElementById('ticket-list');
+        if (!tickets.length) { list.innerHTML = '<div class="ticket-empty">Chưa có cuộc hội thoại nào</div>'; return; }
+        list.innerHTML = '';
+        tickets.forEach(t => {
+          const item = document.createElement('div');
+          item.className = 'ticket-item' + (t.id === selectedTicketId ? ' active' : '');
+          item.onclick = () => selectTicket(t.id);
+
+          const name = currentUserRole === 'shop' ? (t.user_name || 'Khách hàng') : (t.shop_name || 'Hỗ trợ');
+          const {bg,fg} = getAvatarColor(name);
+          const initial = name.charAt(0).toUpperCase();
+
+          item.innerHTML = `
+            <div class="ticket-avatar" style="background:${bg};color:${fg};">${initial}</div>
+            <div class="ticket-info">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span class="ticket-name">${name}</span>
+                <span class="ticket-time">${t.last_message_at ? fmtRelative(t.last_message_at) : ''}</span>
+              </div>
+              <div class="ticket-preview">${t.last_message || t.subject || ''}</div>
+            </div>`;
+          list.appendChild(item);
+        });
+      }
+
+      // ===== SIDEBAR: SEARCH =====
+      function setupSearch() {
+        const input = document.getElementById('search-input');
+        const dropdown = document.getElementById('search-dropdown');
+        input.addEventListener('input', () => {
+          clearTimeout(searchTimeout);
+          const q = input.value.trim();
+          if (!q) { dropdown.classList.remove('open'); return; }
+          searchTimeout = setTimeout(() => doSearch(q), 300);
+        });
+        input.addEventListener('focus', () => { if (input.value.trim()) doSearch(input.value.trim()); });
+        document.addEventListener('click', (e) => { if (!e.target.closest('.search-wrap')) dropdown.classList.remove('open'); });
+      }
+
+      async function doSearch(q) {
+        const dropdown = document.getElementById('search-dropdown');
+        dropdown.innerHTML = '';
+        // Search tickets
+        const ticketMatches = allTickets.filter(t => {
+          const searchName = currentUserRole === 'shop' ? (t.user_name||'') : (t.shop_name||'');
+          return searchName.toLowerCase().includes(q.toLowerCase()) || (t.subject||'').toLowerCase().includes(q.toLowerCase());
+        });
+        // Search shops (only for customers)
+        let shopMatches = [];
+        if (currentUserRole !== 'shop') {
+          if (!allShops) { try { const r = await ShopsAPI.getAllShops(); allShops = r.success ? (r.data||[]) : []; } catch(e) { allShops = []; } }
+          shopMatches = allShops.filter(s => s.shop_name.toLowerCase().includes(q.toLowerCase())).slice(0,5);
+        }
+
+        if (!ticketMatches.length && !shopMatches.length) { dropdown.innerHTML = '<div style="padding:1rem;text-align:center;color:#94A3B8;font-size:0.8125rem;">Không tìm thấy</div>'; dropdown.classList.add('open'); return; }
+
+        if (ticketMatches.length) {
+          const sec = document.createElement('div'); sec.className = 'search-section'; sec.textContent = 'Cuộc hội thoại'; dropdown.appendChild(sec);
+          ticketMatches.slice(0,5).forEach(t => {
+            const name = currentUserRole === 'shop' ? (t.user_name || 'Khách hàng') : (t.shop_name || 'Hỗ trợ');
+            const {bg,fg} = getAvatarColor(name);
+            const item = document.createElement('div'); item.className = 'search-item';
+            item.innerHTML = `<div style="width:32px;height:32px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;color:${fg};flex-shrink:0;">${name.charAt(0).toUpperCase()}</div><div><div style="font-weight:600;font-size:0.8125rem;color:#0F172A;">${name}</div><div style="font-size:0.6875rem;color:#94A3B8;">${t.subject||''}</div></div>`;
+            item.onclick = () => { selectTicket(t.id); dropdown.classList.remove('open'); document.getElementById('search-input').value = ''; };
+            dropdown.appendChild(item);
+          });
+        }
+        if (shopMatches.length) {
+          const sec = document.createElement('div'); sec.className = 'search-section'; if (ticketMatches.length) sec.style.borderTop = '1px solid #F1F5F9'; sec.textContent = 'Shop'; dropdown.appendChild(sec);
+          shopMatches.forEach(s => {
+            const {bg,fg} = getAvatarColor(s.shop_name);
+            const item = document.createElement('div'); item.className = 'search-item';
+            item.innerHTML = `<div style="width:32px;height:32px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;color:${fg};flex-shrink:0;">${s.shop_name.charAt(0).toUpperCase()}</div><div><div style="font-weight:600;font-size:0.8125rem;color:#0F172A;">${s.shop_name}</div><div style="font-size:0.6875rem;color:#94A3B8;">Bắt đầu chat mới →</div></div>`;
+            item.onclick = () => startNewChat(s.id, s.shop_name);
+            dropdown.appendChild(item);
+          });
+        }
+        dropdown.classList.add('open');
+      }
+
+      async function startNewChat(shopId, shopName) {
+        document.getElementById('search-dropdown').classList.remove('open');
+        document.getElementById('search-input').value = '';
+        // Check if ticket already exists for this shop
+        const existing = allTickets.find(t => t.shop_id == shopId);
+        if (existing) { selectTicket(existing.id); return; }
+        try {
+          const res = await SupportAPI.createTicket({ subject: 'Chat với ' + shopName, category: 'product', message: 'Xin chào!', shopId: shopId });
+          if (res.success && res.data) {
+            await loadTicketList();
+            selectTicket(res.data.id);
+          }
+        } catch(e) { showToast('Lỗi','Không tạo được cuộc hội thoại','error'); }
+      }
+
+      // ===== SELECT TICKET =====
+      async function selectTicket(id) {
+        selectedTicketId = id;
+        // Update URL
+        history.replaceState(null, '', 'ticketPage.html?id=' + id);
+        // Highlight sidebar
+        document.querySelectorAll('.ticket-item').forEach((el,i) => { el.classList.toggle('active', allTickets[i] && allTickets[i].id === id); });
+        // Show chat panel
+        document.getElementById('empty-state').style.display = 'none';
+        const chatView = document.getElementById('chat-view');
+        chatView.style.display = 'flex';
+        // Mobile: show chat
+        document.getElementById('chat-panel').classList.add('open');
+        // Stop old polling
+        stopTicketPolling();
+        // Load ticket
+        await loadTicketChat(id);
+      }
+
+      function showSidebar() {
+        document.getElementById('chat-panel').classList.remove('open');
+      }
+
+      // ===== CHAT: LOAD + RENDER =====
+      async function loadTicketChat(id) {
+        const msgList = document.getElementById('message-list');
+        msgList.innerHTML = '<div style="text-align:center;padding:3rem;color:#94A3B8;font-size:0.8125rem;">Đang tải...</div>';
+        try {
+          const res = await SupportAPI.getTicket(id);
+          if (!res.success || !res.data) return;
+          const t = res.data;
+          // Header
+          const name = currentUserRole === 'shop' ? (t.user_name || 'Khách hàng') : (t.shop_name || 'Hỗ trợ');
+          const {bg,fg} = getAvatarColor(name);
+          document.getElementById('cv-avatar').style.background = bg;
+          document.getElementById('cv-avatar').style.color = fg;
+          document.getElementById('cv-avatar').textContent = name.charAt(0).toUpperCase();
+          document.getElementById('cv-name').textContent = name;
+          document.getElementById('cv-subject').textContent = t.subject + ' · #' + t.ticket_number;
+          // Messages
+          ticketMessages = t.messages || [];
+          try { const rr = await SupportAPI.getReadStatus(id); if (rr.success) otherReadAt = rr.lastReadAt; } catch(e) {}
+          renderMessages(ticketMessages);
+          SupportAPI.markAsRead(id).catch(() => {});
+          startTicketPolling(id);
+          // Reply form
+          const form = document.getElementById('reply-form');
+          form.onsubmit = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('reply-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            try {
+              await SupportAPI.addMessage(id, { message: msg });
+              const r = await SupportAPI.getTicket(id);
+              if (r.success) { ticketMessages = r.data.messages || []; renderMessages(ticketMessages); }
+              loadTicketList();
+            } catch(e) { showToast('Lỗi','Không gửi được','error'); }
+          };
+        } catch(e) { msgList.innerHTML = '<div style="text-align:center;padding:3rem;color:#EF4444;font-size:0.8125rem;">Lỗi tải tin nhắn</div>'; }
+      }
+
+      // ===== CHAT: RENDER MESSAGES =====
+      function renderAttachment(attachments, isMe) {
+        if (!attachments) return null;
+        let data;
+        try { data = typeof attachments === 'string' ? JSON.parse(attachments) : attachments; } catch(e) { return null; }
+        if (!data || !data.url) return null;
+        const type = data.type || '';
+        const el = document.createElement('div');
+        if (type.startsWith('image/')) {
+          const img = document.createElement('img');
+          img.src = data.url; img.alt = data.name || 'Image';
+          img.style.cssText = 'max-width:240px;max-height:200px;border-radius:12px;cursor:pointer;display:block;';
+          img.onclick = (e) => { e.stopPropagation(); document.getElementById('lightbox-img').src = data.url; document.getElementById('lightbox').classList.add('open'); };
+          el.appendChild(img);
+        } else if (type.startsWith('video/')) {
+          const video = document.createElement('video');
+          video.src = data.url; video.style.cssText = 'max-width:280px;display:block;border-radius:12px;'; video.preload = 'metadata'; video.controls = true;
+          el.appendChild(video);
+        } else if (type.startsWith('audio/')) {
+          const w = document.createElement('div'); w.style.cssText = 'display:flex;align-items:center;gap:10px;min-width:200px;';
+          const pb = document.createElement('button');
+          pb.style.cssText = 'width:32px;height:32px;border-radius:50%;background:' + (isMe ? 'rgba(255,255,255,0.2)' : '#DBEAFE') + ';display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;flex-shrink:0;';
+          pb.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;color:' + (isMe ? '#fff' : '#2563EB') + ';">play_arrow</span>';
+          const audio = document.createElement('audio'); audio.src = data.url; audio.preload = 'metadata';
+          let playing = false;
+          pb.onclick = (e) => { e.stopPropagation(); if (playing) { audio.pause(); pb.querySelector('span').textContent='play_arrow'; } else { audio.play(); pb.querySelector('span').textContent='pause'; } playing=!playing; };
+          audio.onended = () => { playing=false; pb.querySelector('span').textContent='play_arrow'; };
+          const bars = document.createElement('div'); bars.style.cssText = 'flex:1;display:flex;align-items:center;gap:2px;height:24px;';
+          for (let i=0;i<16;i++) { const b = document.createElement('div'); b.style.cssText='width:3px;height:'+(4+Math.random()*18)+'px;background:'+(isMe?'rgba(255,255,255,'+(0.3+Math.random()*0.5)+')':'rgba(37,99,235,'+(0.2+Math.random()*0.4)+')')+';border-radius:2px;'; bars.appendChild(b); }
+          const dur = document.createElement('span'); dur.style.cssText='font-size:0.6875rem;color:'+(isMe?'rgba(255,255,255,0.7)':'#94A3B8')+';flex-shrink:0;';
+          audio.onloadedmetadata = () => { const s=Math.round(audio.duration); dur.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }; dur.textContent='0:00';
+          w.appendChild(pb); w.appendChild(bars); w.appendChild(dur); el.appendChild(w);
+        }
+        return el;
+      }
+
+      function renderMessages(messages) {
+        const container = document.getElementById('message-list');
+        container.innerHTML = '';
+        ticketKnownMessageIds.clear();
+        ticketLastMessageTime = null;
+
+        for (let i = 0; i < messages.length; i++) {
+          const m = messages[i], prev = i > 0 ? messages[i-1] : null;
+          ticketKnownMessageIds.add(m.id);
+          if (!ticketLastMessageTime || m.created_at > ticketLastMessageTime) ticketLastMessageTime = m.created_at;
+          const isMe = m.sender_id === currentUserId;
+          const isGrouped = prev && prev.sender_id === m.sender_id && isSameDay(prev.created_at, m.created_at);
+          const isLast = !messages[i+1] || messages[i+1].sender_id !== m.sender_id;
+
+          // Date divider
+          if (!prev || !isSameDay(prev.created_at, m.created_at)) {
+            const div = document.createElement('div'); div.style.cssText = 'text-align:center;padding:0.75rem 0;';
+            const badge = document.createElement('span'); badge.style.cssText = 'font-size:0.625rem;color:#94A3B8;background:#E2E8F0;padding:3px 12px;border-radius:999px;'; badge.textContent = fmtDate(m.created_at);
+            div.appendChild(badge); container.appendChild(div);
+          }
+
+          const row = document.createElement('div');
+          row.setAttribute('data-msg-id', m.id);
+          row.style.cssText = 'display:flex;' + (isMe?'justify-content:flex-end;':'') + 'gap:0.5rem;align-items:flex-end;' + (isGrouped?'margin-top:2px;':'margin-top:0.75rem;');
+
+          if (!isMe) {
+            if (!isGrouped) {
+              const av = document.createElement('div'); av.style.cssText = 'width:28px;height:28px;border-radius:50%;background:#DBEAFE;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:700;color:#2563EB;flex-shrink:0;';
+              av.textContent = m.sender_name ? m.sender_name.charAt(0).toUpperCase() : 'S'; row.appendChild(av);
+            } else { const sp = document.createElement('div'); sp.style.cssText='width:28px;flex-shrink:0;'; row.appendChild(sp); }
+          }
+
+          const col = document.createElement('div'); col.style.cssText = 'display:flex;flex-direction:column;'+(isMe?'align-items:flex-end;':'')+'max-width:70%;gap:2px;';
+          if (!isMe && !isGrouped) { const nm = document.createElement('div'); nm.style.cssText='font-size:0.6875rem;color:#64748B;font-weight:600;margin-left:4px;margin-bottom:1px;'; nm.textContent = m.sender_name||'Hỗ trợ'; col.appendChild(nm); }
+
+          const att = renderAttachment(m.attachments, isMe);
+          if (att) { const w = document.createElement('div'); w.style.cssText = isMe?'padding:4px;background:#2563EB;border-radius:18px;':'padding:4px;background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);'; w.appendChild(att); col.appendChild(w); }
+
+          if (m.message && m.message.trim()) {
+            const bubble = document.createElement('div');
+            let r = isMe ? (isGrouped ? '18px 4px 4px 18px' : '18px 18px 4px 18px') : (isGrouped ? '4px 18px 18px 4px' : '4px 18px 18px 18px');
+            if (isMe && isLast && isGrouped) r = '18px 4px 4px 18px';
+            if (!isMe && isLast && isGrouped) r = '4px 18px 18px 18px';
+            bubble.style.cssText = 'padding:10px 14px;font-size:0.8125rem;line-height:1.5;border-radius:'+r+';'+(isMe?'background:#2563EB;color:#fff;':'background:#fff;color:#334155;box-shadow:0 1px 2px rgba(0,0,0,0.04);');
+            bubble.textContent = m.message; col.appendChild(bubble);
+          }
+
+          if (isLast) {
+            const meta = document.createElement('div'); meta.style.cssText = 'display:flex;align-items:center;gap:3px;font-size:0.625rem;color:#94A3B8;margin-top:2px;'+(isMe?'margin-right:4px;':'margin-left:4px;');
+            meta.textContent = fmtTime(m.created_at);
+            if (isMe) { const tk = document.createElement('span'); tk.style.cssText='display:flex;align-items:center;'; tk.setAttribute('data-tick',m.id); tk.innerHTML = (m.read_at||(otherReadAt&&m.created_at<=otherReadAt)) ? TICK_READ : TICK_SENT; meta.appendChild(tk); }
+            col.appendChild(meta);
+          }
+          row.appendChild(col); container.appendChild(row);
+        }
+        container.scrollTop = container.scrollHeight;
+      }
+
+      // ===== POLLING =====
+      function startTicketPolling(id) {
+        stopTicketPolling();
+        ticketPollInterval = setInterval(async () => {
+          if (!ticketLastMessageTime || selectedTicketId !== id) return;
+          try {
+            const res = await SupportAPI.pollMessages(id, ticketLastMessageTime);
+            if (res.success && res.messages && res.messages.length > 0) {
+              let hasNew = false;
+              res.messages.forEach(m => { if (!ticketKnownMessageIds.has(m.id)) { ticketMessages.push(m); hasNew = true; } });
+              if (hasNew) { renderMessages(ticketMessages); SupportAPI.markAsRead(id).catch(()=>{}); loadTicketList(); }
+            }
+            const rr = await SupportAPI.getReadStatus(id);
+            if (rr.success && rr.lastReadAt && rr.lastReadAt !== otherReadAt) {
+              otherReadAt = rr.lastReadAt;
+              document.querySelectorAll('[data-tick]').forEach(el => { const mid=parseInt(el.getAttribute('data-tick')); const msg=ticketMessages.find(m=>m.id===mid); if(msg&&(msg.read_at||(otherReadAt&&msg.created_at<=otherReadAt))) el.innerHTML=TICK_READ; });
+            }
+          } catch(e) {}
+        }, 4000);
+      }
+      function stopTicketPolling() { if (ticketPollInterval) { clearInterval(ticketPollInterval); ticketPollInterval = null; } }
+
+      // ===== FILE UPLOAD =====
+      async function handleFileUpload(files) {
+        if (!files||!files.length||!selectedTicketId) return;
+        for (const file of files) {
+          try {
+            const up = await SupportAPI.uploadChatFile(selectedTicketId, file);
+            if (!up.success) { showToast('Lỗi','Upload thất bại','error'); continue; }
+            await SupportAPI.addMessage(selectedTicketId, { message:'', attachments:up.data });
+            const r = await SupportAPI.getTicket(selectedTicketId);
+            if (r.success) { ticketMessages = r.data.messages||[]; renderMessages(ticketMessages); }
+          } catch(e) { showToast('Lỗi','Upload thất bại','error'); }
+        }
+        document.getElementById('file-image').value = '';
+        document.getElementById('file-video').value = '';
+      }
+
+      // ===== VOICE RECORDING =====
+      async function startRecording() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+          mediaRecorder = new MediaRecorder(stream);
+          recordingChunks = []; recSeconds = 0;
+          mediaRecorder.ondataavailable = (e) => { if (e.data.size>0) recordingChunks.push(e.data); };
+          mediaRecorder.start();
+          document.getElementById('input-bar').style.display = 'none';
+          document.getElementById('recording-bar').style.display = 'flex';
+          recTimerInterval = setInterval(() => {
+            recSeconds++;
+            if (recSeconds >= 120) { stopAndSendRecording(); return; }
+            document.getElementById('rec-timer').textContent = Math.floor(recSeconds/60)+':'+String(recSeconds%60).padStart(2,'0');
+          }, 1000);
+        } catch(e) { showToast('Lỗi','Không thể truy cập microphone','error'); }
+      }
+      function cancelRecording() {
+        if (mediaRecorder&&mediaRecorder.state!=='inactive') { mediaRecorder.stop(); mediaRecorder.stream.getTracks().forEach(t=>t.stop()); }
+        clearInterval(recTimerInterval); recordingChunks = [];
+        document.getElementById('recording-bar').style.display = 'none';
+        document.getElementById('input-bar').style.display = '';
+      }
+      function stopAndSendRecording() {
+        if (!mediaRecorder||mediaRecorder.state==='inactive') return;
+        mediaRecorder.onstop = async () => {
+          clearInterval(recTimerInterval);
+          mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+          document.getElementById('recording-bar').style.display = 'none';
+          document.getElementById('input-bar').style.display = '';
+          if (!recordingChunks.length) return;
+          const blob = new Blob(recordingChunks,{type:'audio/webm'});
+          await handleFileUpload([new File([blob],'voice-message.webm',{type:'audio/webm'})]);
+        };
+        mediaRecorder.stop();
+      }
+    </script>
+  </body>
+</html>

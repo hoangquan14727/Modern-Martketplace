@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HQMart - Đăng nhập</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="../js/toast.js" defer></script>
+    <script src="../js/api.js"></script>
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/login.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
+  </head>
+  <body>
+    <div class="auth-page">
+      <!-- Hero -->
+      <div class="auth-hero">
+        <div class="auth-hero-logo">HQ<span style="font-weight:400">Mart</span></div>
+        <h1 class="auth-hero-title">Chào mừng trở lại!</h1>
+        <p class="auth-hero-desc">Đăng nhập để tiếp tục mua sắm và quản lý đơn hàng của bạn.</p>
+        <div class="auth-hero-features">
+          <div class="auth-feature"><div class="auth-feature-icon"><span class="material-symbols-outlined" style="font-size:1.125rem">verified</span></div>Sản phẩm chính hãng 100%</div>
+          <div class="auth-feature"><div class="auth-feature-icon"><span class="material-symbols-outlined" style="font-size:1.125rem">local_shipping</span></div>Miễn phí vận chuyển toàn quốc</div>
+          <div class="auth-feature"><div class="auth-feature-icon"><span class="material-symbols-outlined" style="font-size:1.125rem">support_agent</span></div>Hỗ trợ 24/7</div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="auth-form-panel">
+        <div class="auth-form-container">
+          <a href="homePage.html" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--hq-text-muted);font-size:0.8125rem;margin-bottom:1.5rem"><span class="material-symbols-outlined" style="font-size:1rem">arrow_back</span>Trang chủ</a>
+          <div class="auth-form-header">
+            <h2 class="auth-form-title">Đăng nhập</h2>
+            <p class="auth-form-subtitle">Nhập thông tin tài khoản của bạn</p>
+          </div>
+
+          <form id="login-form">
+            <div class="auth-input-group">
+              <label class="auth-input-label" for="email">Email</label>
+              <div class="auth-input-wrapper">
+                <span class="material-symbols-outlined auth-input-icon">mail</span>
+                <input class="auth-input" id="email" type="email" placeholder="email@example.com" required />
+              </div>
+            </div>
+            <div class="auth-input-group">
+              <label class="auth-input-label" for="password">Mật khẩu</label>
+              <div class="auth-input-wrapper">
+                <span class="material-symbols-outlined auth-input-icon">lock</span>
+                <input class="auth-input" id="password" type="password" placeholder="••••••••" required />
+              </div>
+            </div>
+            <div class="auth-options">
+              <label class="auth-checkbox-group"><input type="checkbox" /> Ghi nhớ đăng nhập</label>
+              <a href="resetpwPage.html" class="auth-forgot-link">Quên mật khẩu?</a>
+            </div>
+            <button class="auth-submit-btn" type="submit">Đăng nhập</button>
+          </form>
+
+          <div class="auth-divider">Hoặc đăng nhập với</div>
+          <div class="auth-social">
+            <button class="auth-social-btn"><span>Google</span></button>
+            <button class="auth-social-btn"><span>GitHub</span></button>
+          </div>
+          <p class="auth-switch">Chưa có tài khoản? <a href="signupPage.html">Đăng ký</a></p>
+          <div id="error-message" class="auth-message error hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.fonts.ready.then(() => document.body.classList.add('font-loaded'));
+      document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('error-message');
+        const btn = this.querySelector('button[type="submit"]');
+        errorDiv.classList.add('hidden');
+        if (!email || !password) { errorDiv.textContent = 'Vui lòng nhập email và mật khẩu'; errorDiv.classList.remove('hidden'); return; }
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite;font-size:1.125rem">progress_activity</span> Đang đăng nhập...';
+        btn.disabled = true;
+        const res = await AuthAPI.login(email, password);
+        if (!res.success) {
+          errorDiv.textContent = res.message || 'Đăng nhập thất bại';
+          errorDiv.classList.remove('hidden');
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
+    </script>
+    <style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>
+  </body>
+</html>

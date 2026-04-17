@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HQMart - Chờ duyệt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>tailwind.config={theme:{extend:{colors:{hq:{primary:'#2563EB',dark:'#0F172A',sale:'#EF4444',success:'#10B981',warning:'#F59E0B'}},fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <script src="../js/toast.js" defer></script>
+    <script src="../js/api.js"></script>
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
+  </head>
+  <body style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--hq-bg);">
+    <div style="max-width:32rem;width:100%;text-align:center;padding:2rem;">
+      <div style="width:5rem;height:5rem;background:var(--hq-warning-bg);border-radius:var(--hq-radius-full);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;">
+        <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--hq-warning)">hourglass_top</span>
+      </div>
+      <h1 style="font-size:1.5rem;font-weight:700;color:var(--hq-text);margin-bottom:0.5rem;">Đang chờ phê duyệt</h1>
+      <p style="color:var(--hq-text-muted);margin-bottom:2rem;line-height:1.6;">Tài khoản người bán của bạn đang được quản trị viên xem xét. Quá trình này thường mất 1-2 ngày làm việc.</p>
+
+      <div style="background:var(--hq-bg-white);border:1px solid var(--hq-border);border-radius:var(--hq-radius-md);padding:1.5rem;text-align:left;margin-bottom:2rem;">
+        <h3 style="font-size:0.875rem;font-weight:700;color:var(--hq-text);margin-bottom:1rem;">Các bước tiếp theo:</h3>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+            <span class="material-symbols-outlined" style="color:var(--hq-success);font-size:1.25rem;margin-top:0.125rem">check_circle</span>
+            <span style="font-size:0.875rem;color:var(--hq-text-secondary)">Đăng ký tài khoản người bán</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+            <span class="material-symbols-outlined" style="color:var(--hq-warning);font-size:1.25rem;margin-top:0.125rem;animation:spin 2s linear infinite">progress_activity</span>
+            <span style="font-size:0.875rem;color:var(--hq-text-secondary)">Quản trị viên xem xét và phê duyệt</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+            <span class="material-symbols-outlined" style="color:var(--hq-text-light);font-size:1.25rem;margin-top:0.125rem">circle</span>
+            <span style="font-size:0.875rem;color:var(--hq-text-light)">Bắt đầu đăng bán sản phẩm</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="checkStatus()" class="btn btn-primary btn-lg" style="width:100%">Kiểm tra trạng thái</button>
+        <a href="homePage.html" class="btn btn-secondary btn-lg" style="width:100%">Về trang chủ</a>
+        <button onclick="AuthAPI.logout()" style="color:var(--hq-text-muted);font-size:0.875rem;margin-top:0.5rem">Đăng xuất</button>
+      </div>
+    </div>
+
+    <script>
+      document.fonts.ready.then(() => document.body.classList.add('font-loaded'));
+      async function checkStatus() {
+        try {
+          const user = TokenService.getUser();
+          if (!user) { window.location.href = 'loginPage.html'; return; }
+          const res = await AuthAPI.checkAuth('shop');
+          if (res && res.role === 'shop') {
+            showToast('Đã duyệt!', 'Tài khoản đã được phê duyệt!', 'success');
+            setTimeout(() => window.location.href = 'shopPage.html', 1500);
+          } else {
+            showToast('Thông báo', 'Tài khoản vẫn đang chờ duyệt', 'info');
+          }
+        } catch(e) { showToast('Thông báo', 'Tài khoản vẫn đang chờ duyệt', 'info'); }
+      }
+    </script>
+    <style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>
+  </body>
+</html>

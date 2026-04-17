@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HQMart - Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>tailwind.config={theme:{extend:{colors:{hq:{primary:'#2563EB','primary-hover':'#1D4ED8','primary-light':'#DBEAFE',dark:'#0F172A',sale:'#EF4444',success:'#10B981',rating:'#F59E0B'}},fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <script src="../js/toast.js" defer></script>
+    <script src="../js/reveal.js" defer></script>
+    <script src="../js/api.js"></script>
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/navbar.css" />
+    <link rel="stylesheet" href="../css/product.css" />
+    <link rel="stylesheet" href="../css/home.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
+    <style>
+      .shop-profile-header {
+        position: relative;
+      }
+      .shop-banner {
+        height: 220px;
+        background-size: cover;
+        background-position: center;
+        background-color: var(--hq-primary);
+        position: relative;
+      }
+      .shop-banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
+      }
+      .shop-info-card {
+        max-width: 1280px;
+        margin: -3rem auto 0;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 5;
+      }
+      .shop-info-card-inner {
+        background: var(--hq-bg-white);
+        border: 1px solid var(--hq-border);
+        border-radius: var(--hq-radius-lg);
+        padding: 1.5rem 2rem;
+        box-shadow: var(--hq-shadow-md);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+      }
+      .shop-info-left-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        min-width: 0;
+      }
+      .shop-profile-avatar {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        background: var(--hq-primary-light);
+        border: 3px solid #fff;
+        box-shadow: var(--hq-shadow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .shop-profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .shop-profile-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--hq-text);
+        margin-bottom: 0.25rem;
+      }
+      .shop-profile-desc {
+        font-size: 0.8125rem;
+        color: var(--hq-text-muted);
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .shop-stats-grid {
+        display: flex;
+        gap: 1.5rem;
+        flex-shrink: 0;
+      }
+      .shop-stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: var(--hq-bg);
+        border-radius: var(--hq-radius);
+      }
+      .shop-stat-icon {
+        font-size: 1.25rem;
+        color: var(--hq-primary);
+      }
+      .shop-stat-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--hq-text);
+      }
+      .shop-stat-label {
+        font-size: 0.6875rem;
+        color: var(--hq-text-muted);
+      }
+      .product-reveal {
+        opacity: 0;
+        transform: translateY(16px);
+        transition: opacity 0.35s ease, transform 0.35s ease;
+      }
+      .product-reveal.revealed {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @media (max-width: 1024px) {
+        .shop-info-card-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .shop-stats-grid {
+          width: 100%;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+        .shop-stat-item {
+          flex: 1;
+          min-width: calc(50% - 0.5rem);
+        }
+        .shop-banner {
+          height: 160px;
+        }
+      }
+      @media (max-width: 640px) {
+        .shop-banner {
+          height: 120px;
+        }
+        .shop-profile-avatar {
+          width: 3.5rem;
+          height: 3.5rem;
+        }
+        .shop-profile-name {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body style="display:flex;flex-direction:column;min-height:100vh;">
+    <!-- ===== HEADER ===== -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-container">
+        <div class="nav-content">
+          <a href="homePage.html" class="brand-link"><span class="brand-name"><span class="brand-hq">HQ</span><span class="brand-mart">Mart</span></span></a>
+          <div class="nav-links">
+            <a href="homePage.html" class="nav-link">Trang chủ</a>
+            <a href="productPage.html" class="nav-link">Sản phẩm</a>
+          </div>
+          <div class="nav-search">
+            <div class="search-input-wrapper">
+              <span class="material-symbols-outlined search-icon">search</span>
+              <input type="text" class="search-input" placeholder="Tìm kiếm sản phẩm..." id="search-input" autocomplete="off" />
+              <button class="search-btn" id="search-btn"><span class="material-symbols-outlined">search</span></button>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <button class="nav-icon-btn" onclick="window.location.href='ticketPage.html'" title="Tin nhắn"><span class="material-symbols-outlined">chat</span><span id="msg-badge" class="nav-badge-count hidden">0</span></button>
+            <button class="nav-icon-btn" onclick="window.location.href='cartPage.html'" title="Giỏ hàng">
+              <span class="material-symbols-outlined">shopping_cart</span>
+              <span id="cart-badge" class="nav-badge-count hidden">0</span>
+            </button>
+            <div id="auth-buttons" class="auth-buttons hidden">
+              <a href="loginPage.html" class="btn-login">Đăng nhập</a>
+              <a href="signupPage.html" class="btn-register">Đăng ký</a>
+            </div>
+            <div id="user-menu" class="user-menu hidden">
+              <button class="user-menu-btn"><div class="user-avatar" id="user-avatar">U</div></button>
+              <div class="user-dropdown">
+                <div class="user-dropdown-card">
+                  <div class="user-dropdown-header"><p class="user-name" id="menu-user-name">User</p><p class="user-email" id="menu-user-email"></p></div>
+                  <a href="customerPage.html?tab=overview" id="dashboard-link" class="user-dropdown-link"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+                  <a href="customerPage.html?tab=settings" class="user-dropdown-link"><span class="material-symbols-outlined">person</span> Tài khoản</a>
+                  <a href="customerPage.html?tab=orders" class="user-dropdown-link"><span class="material-symbols-outlined">shopping_bag</span> Đơn hàng</a>
+                  <div class="user-dropdown-divider"></div>
+                  <button onclick="logout()" class="user-dropdown-link user-dropdown-btn logout"><span class="material-symbols-outlined">logout</span> Đăng xuất</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main style="flex:1;">
+      <!-- ===== BREADCRUMB ===== -->
+      <div style="max-width:1280px;margin:0 auto;padding:0.5rem 2rem;">
+        <div class="breadcrumb">
+          <a href="homePage.html">Trang chủ</a><span class="separator">/</span><span class="current" id="breadcrumb-shop-name">Shop</span>
+        </div>
+      </div>
+
+      <!-- ===== SHOP HEADER ===== -->
+      <div class="shop-profile-header">
+        <div class="shop-banner" id="shop-banner">
+          <div class="shop-banner-overlay"></div>
+        </div>
+        <div class="shop-info-card">
+          <div class="shop-info-card-inner">
+            <div class="shop-info-left-section">
+              <div class="shop-profile-avatar" id="shop-avatar">
+                <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--hq-primary)">store</span>
+              </div>
+              <div style="min-width:0;">
+                <h1 class="shop-profile-name" id="shop-name">Đang tải...</h1>
+                <p class="shop-profile-desc" id="shop-description">Đang tải thông tin shop...</p>
+              </div>
+            </div>
+            <div class="shop-stats-grid" id="shop-stats">
+              <div class="shop-stat-item">
+                <span class="material-symbols-outlined shop-stat-icon">inventory_2</span>
+                <div>
+                  <div class="shop-stat-value" id="stat-products">0</div>
+                  <div class="shop-stat-label">Sản phẩm</div>
+                </div>
+              </div>
+              <div class="shop-stat-item">
+                <span class="material-symbols-outlined shop-stat-icon">star</span>
+                <div>
+                  <div class="shop-stat-value" id="stat-rating">0</div>
+                  <div class="shop-stat-label">Đánh giá</div>
+                </div>
+              </div>
+              <div class="shop-stat-item">
+                <span class="material-symbols-outlined shop-stat-icon">reviews</span>
+                <div>
+                  <div class="shop-stat-value" id="stat-reviews">0</div>
+                  <div class="shop-stat-label">Lượt đánh giá</div>
+                </div>
+              </div>
+              <div class="shop-stat-item">
+                <span class="material-symbols-outlined shop-stat-icon">calendar_month</span>
+                <div>
+                  <div class="shop-stat-value" id="stat-joined">--</div>
+                  <div class="shop-stat-label">Tham gia</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== FILTER BAR ===== -->
+      <div class="filter-bar" style="margin-top:1.5rem;">
+        <div class="filter-bar-inner">
+          <div class="filter-categories" id="filter-categories">
+            <button class="filter-chip active" data-category="All">Tất cả sản phẩm</button>
+          </div>
+          <div class="sort-bar">
+            <button class="sort-tab active" data-sort="newest">Mới nhất</button>
+            <button class="sort-tab" data-sort="sold">Bán chạy</button>
+            <button class="sort-tab" data-sort="price_asc">Giá thấp</button>
+            <button class="sort-tab" data-sort="price_desc">Giá cao</button>
+            <button class="sort-tab" data-sort="rating">Đánh giá</button>
+            <span class="results-count" id="results-count-display"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PRODUCTS GRID ===== -->
+      <div class="products-section">
+        <div class="product-listing-grid" id="products-grid">
+          <!-- Skeleton loading -->
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+          <div class="product-card-skeleton"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text skeleton-text-short"></div><div class="skeleton skeleton-price"></div></div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-heading" style="font-size:1.25rem;font-weight:800;"><span style="color:#60A5FA;">HQ</span>Mart</div>
+            <p style="color:#94A3B8;font-size:0.8125rem;line-height:1.6;">Nền tảng mua sắm trực tuyến hàng đầu. Sản phẩm chính hãng, giá tốt nhất.</p>
+          </div>
+          <div>
+            <h4 class="footer-heading">Trang chính</h4>
+            <a href="homePage.html" class="footer-link">Trang chủ</a>
+            <a href="productPage.html" class="footer-link">Sản phẩm</a>
+            <a href="signupPage.html?type=seller" class="footer-link">Đăng ký bán hàng</a>
+          </div>
+          <div>
+            <h4 class="footer-heading">Hỗ trợ</h4>
+            <a href="ticketPage.html" class="footer-link">Trung tâm trợ giúp</a>
+            <a href="privacyPage.html" class="footer-link">Chính sách bảo mật</a>
+            <a href="privacyPage.html" class="footer-link">Điều khoản sử dụng</a>
+          </div>
+          <div>
+            <h4 class="footer-heading">Kết nối</h4>
+            <a href="#" class="footer-link">Facebook</a>
+            <a href="#" class="footer-link">Instagram</a>
+            <a href="#" class="footer-link">YouTube</a>
+          </div>
+        </div>
+        <div class="footer-bottom">&copy; 2026 HQMart. All rights reserved.</div>
+      </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+      <span class="material-symbols-outlined">keyboard_arrow_up</span>
+    </button>
+
+    <script>
+      // ===== GLOBAL STATE =====
+      const ITEMS_PER_PAGE = 30;
+      let shopData = null;
+      let allProducts = [];
+      let filteredProducts = [];
+      let currentCategory = 'All';
+      let currentSort = 'newest';
+      let currentPage = 1;
+
+      // URL param: ?id=X (shop ID or slug)
+      const urlParams = new URLSearchParams(window.location.search);
+      const shopId = urlParams.get('id');
+
+      // ===== INIT =====
+      document.fonts.ready.then(() => document.body.classList.add('font-loaded'));
+
+      window.addEventListener('scroll', () => {
+        const btn = document.getElementById('back-to-top');
+        if (window.scrollY > 300) btn.classList.add('visible');
+        else btn.classList.remove('visible');
+      });
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        checkAuth();
+        setupSearch();
+
+        if (!shopId) {
+          document.getElementById('shop-name').textContent = 'Không tìm thấy shop';
+          document.getElementById('shop-description').textContent = 'Vui lòng kiểm tra lại đường dẫn.';
+          document.getElementById('products-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--hq-text-muted)">Không có mã shop trong URL.</div>';
+          return;
+        }
+
+        await loadShopInfo();
+        await loadShopProducts();
+      });
+
+      // ===== AUTH =====
+      function checkAuth() {
+        if (typeof TokenService === 'undefined') return;
+        const user = TokenService.getUser();
+        if (user) {
+          document.getElementById('auth-buttons').classList.add('hidden');
+          document.getElementById('user-menu').classList.remove('hidden');
+          const firstName = user.firstName || user.first_name || '';
+          const lastName = user.lastName || user.last_name || '';
+          const fullName = `${firstName} ${lastName}`.trim() || user.name || 'User';
+          const initials = (firstName?.[0] || fullName?.[0] || 'U') + (lastName?.[0] || '');
+          document.getElementById('menu-user-name').textContent = fullName;
+          document.getElementById('menu-user-email').textContent = user.email || '';
+          document.getElementById('user-avatar').textContent = initials.toUpperCase();
+          let dashboardLink = 'customerPage.html?tab=overview';
+          if (user.role === 'shop') dashboardLink = 'shopPage.html';
+          if (user.role === 'admin') dashboardLink = 'adminPage.html';
+          document.getElementById('dashboard-link').href = dashboardLink;
+          if (user.role !== 'admin') updateCartBadge();
+          updateGlobalMsgBadge();
+        } else {
+          document.getElementById('auth-buttons').classList.remove('hidden');
+          document.getElementById('user-menu').classList.add('hidden');
+        }
+      }
+
+      function logout() { AuthAPI.logout(); }
+      async function updateCartBadge() { await updateGlobalCartBadge(); updateGlobalMsgBadge(); }
+
+      // ===== SEARCH =====
+      function setupSearch() {
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        function doSearch() {
+          const q = searchInput.value.trim();
+          if (q) window.location.href = `productPage.html?search=${encodeURIComponent(q)}`;
+        }
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') doSearch(); });
+        searchBtn.addEventListener('click', doSearch);
+      }
+
+      // ===== FORMAT HELPERS =====
+      function formatStatNumber(num) {
+        if (num == null || isNaN(num)) return '0';
+        num = Number(num);
+        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+        return num.toString();
+      }
+
+      function formatJoinDate(dateStr) {
+        if (!dateStr) return '--';
+        const created = new Date(dateStr);
+        const now = new Date();
+        let months = (now.getFullYear() - created.getFullYear()) * 12 + (now.getMonth() - created.getMonth());
+        if (months < 0) months = 0;
+        const years = Math.floor(months / 12);
+        const remainingMonths = months % 12;
+        if (years > 0 && remainingMonths > 0) return `${years} năm ${remainingMonths} tháng`;
+        if (years > 0) return `${years} năm`;
+        if (remainingMonths > 0) return `${remainingMonths} tháng`;
+        return 'Mới';
+      }
+
+      // ===== LOAD SHOP INFO =====
+      async function loadShopInfo() {
+        try {
+          const res = await ShopsAPI.getShopPublic(shopId);
+          if (!res.success || !res.data) {
+            document.getElementById('shop-name').textContent = 'Không tìm thấy shop';
+            document.getElementById('shop-description').textContent = 'Shop không tồn tại hoặc chưa được duyệt.';
+            return;
+          }
+          shopData = res.data;
+
+          // Page title & breadcrumb
+          document.title = `HQMart - ${shopData.shop_name}`;
+          document.getElementById('breadcrumb-shop-name').textContent = shopData.shop_name;
+
+          // Banner
+          const bannerEl = document.getElementById('shop-banner');
+          if (shopData.banner) {
+            bannerEl.style.backgroundImage = `url('${shopData.banner}')`;
+          } else {
+            bannerEl.style.background = 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 50%, #1E40AF 100%)';
+          }
+
+          // Avatar
+          const avatarEl = document.getElementById('shop-avatar');
+          if (shopData.logo) {
+            avatarEl.innerHTML = `<img src="${shopData.logo}" alt="${escapeHtml(shopData.shop_name)}" />`;
+          }
+
+          // Name & description
+          document.getElementById('shop-name').textContent = shopData.shop_name;
+          document.getElementById('shop-description').textContent = shopData.description || 'Chào mừng bạn đến với shop!';
+
+          // Stats
+          document.getElementById('stat-products').textContent = formatStatNumber(shopData.total_products);
+          document.getElementById('stat-rating').textContent = shopData.rating ? Number(shopData.rating).toFixed(1) : '5.0';
+          document.getElementById('stat-reviews').textContent = formatStatNumber(shopData.total_reviews);
+          document.getElementById('stat-joined').textContent = formatJoinDate(shopData.created_at);
+
+        } catch (e) {
+          console.error('Load shop info error:', e);
+          document.getElementById('shop-name').textContent = 'Lỗi tải thông tin';
+          document.getElementById('shop-description').textContent = 'Không thể kết nối đến server.';
+        }
+      }
+
+      // ===== LOAD SHOP PRODUCTS =====
+      async function loadShopProducts() {
+        try {
+          const res = await ProductsAPI.getAllProducts({ shop_id: shopId, sort: currentSort, limit: 1000 });
+          if (res.success && res.data) {
+            allProducts = res.data;
+            buildCategoryTabs(allProducts);
+            setupSortTabs();
+            renderFilteredProducts();
+          } else {
+            document.getElementById('products-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--hq-text-muted)">Shop chưa có sản phẩm nào.</div>';
+            document.getElementById('results-count-display').textContent = '0 sản phẩm';
+          }
+        } catch (e) {
+          console.error('Load products error:', e);
+          document.getElementById('products-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--hq-sale)">Lỗi kết nối. Kiểm tra API server.</div>';
+        }
+      }
+
+      // ===== BUILD CATEGORY TABS =====
+      function buildCategoryTabs(products) {
+        const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+        const container = document.getElementById('filter-categories');
+        let html = '<button class="filter-chip active" data-category="All">Tất cả sản phẩm</button>';
+        categories.forEach(cat => {
+          html += `<button class="filter-chip" data-category="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`;
+        });
+        container.innerHTML = html;
+
+        // Bind click events
+        container.querySelectorAll('.filter-chip[data-category]').forEach(chip => {
+          chip.addEventListener('click', () => {
+            container.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentCategory = chip.dataset.category;
+            currentPage = 1;
+            renderFilteredProducts();
+          });
+        });
+      }
+
+      // ===== SETUP SORT TABS =====
+      function setupSortTabs() {
+        const tabs = document.querySelectorAll('.sort-tab[data-sort]');
+        tabs.forEach(t => {
+          t.addEventListener('click', () => {
+            tabs.forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
+            currentSort = t.dataset.sort;
+            currentPage = 1;
+            // Re-sort the products locally
+            sortProducts();
+            renderFilteredProducts();
+          });
+        });
+      }
+
+      function sortProducts() {
+        switch (currentSort) {
+          case 'newest':
+            allProducts.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            break;
+          case 'sold':
+            allProducts.sort((a, b) => (b.total_sold || 0) - (a.total_sold || 0));
+            break;
+          case 'price_asc':
+            allProducts.sort((a, b) => Number(a.price) - Number(b.price));
+            break;
+          case 'price_desc':
+            allProducts.sort((a, b) => Number(b.price) - Number(a.price));
+            break;
+          case 'rating':
+            allProducts.sort((a, b) => (Number(b.avg_rating || b.rating) || 5) - (Number(a.avg_rating || a.rating) || 5));
+            break;
+        }
+      }
+
+      // ===== RENDER FILTERED PRODUCTS =====
+      function renderFilteredProducts() {
+        const grid = document.getElementById('products-grid');
+        const paginationEl = document.getElementById('pagination');
+        const countDisplay = document.getElementById('results-count-display');
+
+        // Filter by category
+        filteredProducts = currentCategory === 'All'
+          ? [...allProducts]
+          : allProducts.filter(p => p.category === currentCategory);
+
+        countDisplay.textContent = `${filteredProducts.length} sản phẩm`;
+
+        if (filteredProducts.length === 0) {
+          grid.innerHTML = `<div class="no-results" style="grid-column:1/-1">
+            <div class="no-results-icon"><span class="material-symbols-outlined" style="font-size:3rem">search_off</span></div>
+            <h3 class="no-results-title">Không tìm thấy sản phẩm</h3>
+            <p class="no-results-desc">Thử chọn danh mục khác.</p>
+          </div>`;
+          paginationEl.innerHTML = '';
+          return;
+        }
+
+        // Paginate
+        const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+        if (currentPage > totalPages) currentPage = 1;
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        const paginated = filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+
+        // Render cards
+        grid.innerHTML = paginated.map((p, i) => {
+          const discount = p.original_price ? Math.round((1 - p.price / p.original_price) * 100) : 0;
+          const name = p.name.length > 50 ? p.name.substring(0, 47) + '...' : p.name;
+          const rating = p.avg_rating ? Number(p.avg_rating).toFixed(1) : (p.rating ? Number(p.rating).toFixed(1) : '5.0');
+          const sold = p.total_sold || p.sold_quantity || 0;
+          const price = Number(p.price);
+          const imgSrc = p.image || p.image_url || '';
+
+          return `
+          <div class="product-card product-reveal" style="transition-delay:${(i % 5) * 50}ms" onclick="window.location.href='productPage.html?id=${p.id}'">
+            <div class="product-card-image" style="${imgSrc ? `background-image:url('${imgSrc}')` : ''}">
+              ${!imgSrc ? '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--hq-text-light)"><span class="material-symbols-outlined" style="font-size:2.5rem">image</span></div>' : ''}
+              ${discount > 0 ? `<span class="product-card-discount">-${discount}%</span>` : ''}
+              <button class="product-card-wishlist" onclick="event.stopPropagation();addToWishlist(${p.id})"><span class="material-symbols-outlined" style="font-size:1.125rem">favorite</span></button>
+            </div>
+            <div class="product-card-info">
+              <div class="product-card-name">${escapeHtml(name)}</div>
+              <div>
+                <span class="product-card-price">₫${price.toLocaleString('vi-VN')}</span>
+                ${p.original_price ? `<span class="product-card-original-price">₫${Number(p.original_price).toLocaleString('vi-VN')}</span>` : ''}
+              </div>
+              <div class="product-card-meta">
+                <span class="product-card-rating">★ ${rating}</span>
+                <span class="product-card-sold">Đã bán ${sold}</span>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+
+        // Pagination
+        if (totalPages > 1) {
+          let html = `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><span class="material-symbols-outlined" style="font-size:1.125rem">chevron_left</span></button>`;
+          for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+              html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+              html += `<span style="color:var(--hq-text-muted)">...</span>`;
+            }
+          }
+          html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><span class="material-symbols-outlined" style="font-size:1.125rem">chevron_right</span></button>`;
+          paginationEl.innerHTML = html;
+        } else {
+          paginationEl.innerHTML = '';
+        }
+
+        // Reveal animation
+        setupRevealObserver();
+      }
+
+      // ===== PAGINATION =====
+      function changePage(page) {
+        const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderFilteredProducts();
+        const breadcrumb = document.querySelector('.breadcrumb');
+        if (breadcrumb) {
+          breadcrumb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+
+      // ===== REVEAL OBSERVER =====
+      function setupRevealObserver() {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.05, rootMargin: '0px 0px 40px 0px' });
+        document.querySelectorAll('.product-reveal').forEach(el => observer.observe(el));
+      }
+
+      // ===== ADD TO WISHLIST =====
+      async function addToWishlist(id) {
+        const user = typeof TokenService !== 'undefined' ? TokenService.getUser() : null;
+        if (!user) { showToast('Yêu cầu đăng nhập', 'Vui lòng đăng nhập', 'error'); setTimeout(() => window.location.href = 'loginPage.html', 1500); return; }
+        if (user.role !== 'customer') { showToast('Thông báo', 'Chỉ tài khoản khách hàng mới có thể thêm yêu thích', 'info'); return; }
+        try {
+          const res = await CustomersAPI.addToWishlist(id);
+          if (res.success) showToast('Thành công', 'Đã thêm vào yêu thích', 'success');
+          else showToast('Thông báo', res.message || 'Đã có trong yêu thích', 'info');
+        } catch (e) { showToast('Lỗi', e.message, 'error'); }
+      }
+
+      // ===== ADD TO CART =====
+      async function addToCart(id) {
+        const user = typeof TokenService !== 'undefined' ? TokenService.getUser() : null;
+        if (!user) { showToast('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để mua hàng', 'error'); setTimeout(() => window.location.href = 'loginPage.html', 1500); return; }
+        try {
+          const res = await CartAPI.addToCart(id, 1);
+          if (res.success) { showToast('Thành công', 'Đã thêm vào giỏ hàng', 'success'); updateCartBadge(); }
+          else showToast('Lỗi', res.message || 'Không thể thêm', 'error');
+        } catch (e) { showToast('Lỗi', 'Không thể kết nối server', 'error'); }
+      }
+    </script>
+  </body>
+</html>
